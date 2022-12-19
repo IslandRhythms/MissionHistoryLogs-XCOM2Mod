@@ -1,0 +1,19 @@
+[UISL_CommanderQuarter]
+LabelShortcut=Mission History Logs
+TooltipShortcut="View past missions and details"
+
+[MissionHistoryScreen]
+
+m_ScreenTitle="Mission History Log"
+m_ProgressTitle="Loading Logs"
+m_ProgressText="One Moment..."
+
+m_Header_Objective = "Objective"
+m_Header_Squad = "Faction"
+m_Header_Enemies = "Enemy Presence"
+
+labels[0]="Mission"
+labels[1]="Squad"
+labels[2]="Date"
+labels[3]="Mission Rating"
+labels[4]="Current Success Rate"

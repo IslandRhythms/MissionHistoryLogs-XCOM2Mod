@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>71464f33-1328-43a5-b3a7-e1278bd89611</Guid>
+    <Name>Mission History Logs</Name>
+    <Description>Description of My XCOM 2 Mod.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>MissionHistoryLogs</AssemblyName>
+    <RootNamespace>MissionHistoryLogs</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Config\" />
+    <Folder Include="Localization\" />
+    <Folder Include="Src\" />
+    <Folder Include="Src\LW_Tuple\Classes" />
+    <Folder Include="Src\MissionHistoryLogs\" />
+    <Folder Include="Src\MissionHistoryLogs\Classes\" />
+    <Folder Include="Src\LW_Tuple" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\XComUI.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Localization\MissionHistoryLogs.int">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="Config\XComEditor.ini" />
+    <Content Include="Config\XComEngine.ini" />
+    <Content Include="Config\XComGame.ini" />
+    <Content Include="Localization\XComGame.int" />
+    <Content Include="Src\LW_Tuple\Classes\LWTuple.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\MissionHistoryLogs\Classes\MissionHistoryScreen.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\MissionHistoryLogs\Classes\MissionHistoryScreenManager.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\MissionHistoryLogs\Classes\MissionHistory_ListItem.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\MissionHistoryLogs\Classes\UISL_CommanderQuarter.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\MissionHistoryLogs\Classes\X2DownloadableContentInfo_MissionHistoryLogs.uc" />
+  </ItemGroup>
+  <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
+</Project>
