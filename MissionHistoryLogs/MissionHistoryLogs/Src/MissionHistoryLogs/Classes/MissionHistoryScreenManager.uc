@@ -1,43 +1,6 @@
 // This is an Unreal Script
 
-class MissionHistoryScreenManager extends Object config(MissionHistoryLogs);
-
-// 5 of these are on the top. MissionImagePath is non-negotiable
-// Another 5 on the bottom
-// 10 of these will be used, the rest are irrelevant.
-struct MissionHistoryLogsDetails {
-	var int CampaignIndex;
-	var int EntryIndex; // This is to keep track of where the entry was added into the CurrentEntries array;
-	var int SoldiersDeployed;
-	var int SoldiersKilled;
-	var string SuccessRate;
-	var float wins;
-	var string Date;
-	var string MissionName;
-	var string MissionObjective;
-	var string MapName;
-	var string MapImagePath;
-	var string Squad; // will be XCOM unitl we figure out how to incorporate Squad Manager Mod
-	var string Enemies; // either the chosen name or advent
-	var string ChosenName;
-	var string QuestGiver;
-	var string MissionRating; // Poor, Good, Fair, Excellent, Flawless.
-	var string MissionLocation; // city and country of the mission
-
-};
-
-struct ChosenInformation {
-	var string ChosenType;
-	var string ChosenName;
-	var int numEncounters;
-	var int CampaignIndex;
-};
-
-
-var config array<MissionHistoryLogsDetails> CurrentEntries;
-var config array<MissionHistoryLogsDetails> AllEntries;
-// fireaxis why
-var config array<ChosenInformation> TheChosen;
+class MissionHistoryScreenManager extends Object
 
 
 simulated static function WipeLogs() {
@@ -64,10 +27,12 @@ simulated static function AppendEntry(string rating) {
 	local string ChosenName;
 	local XComGameState_LWSquadManager SquadMgr;
 	local XComGameState_LWPersistentSquad Squad;
+	local XComGameState_MissionHistoryLogs Logs;
 
 	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionHistoryLogs', true));
 	// This will get the correct squad on a mission
 	if(IsModActive('SquadManager')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
@@ -81,6 +46,7 @@ simulated static function AppendEntry(string rating) {
 			ItemData.Squad = "XCOM";
 		}
 	} else {
+		// can also take approach of listing Unit nicknames that were on the mission.
 		ItemData.Squad = "XCOM";
 	}
 	AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien', true));
