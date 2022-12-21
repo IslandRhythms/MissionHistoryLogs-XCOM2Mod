@@ -2,7 +2,7 @@
 
 class MissionHistoryScreenManager extends Object;
 
-
+/*
 simulated static function WipeLogs() {
 	default.CurrentEntries.Length = 0;
 	StaticSaveConfig();
@@ -93,3 +93,5 @@ simulated static function int SortByCampaignIndex(MissionHistoryLogsDetails A, M
 simulated static function int SortByChosenCampaignIndex(ChosenInformation A, ChosenInformation B) {
 	return A.CampaignIndex < B.CampaignIndex ? 1 : 0; 
 }
+
+*/

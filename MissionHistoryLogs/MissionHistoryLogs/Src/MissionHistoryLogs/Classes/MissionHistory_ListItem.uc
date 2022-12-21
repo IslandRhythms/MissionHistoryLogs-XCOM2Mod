@@ -1,7 +1,7 @@
 // This is an Unreal Script
 
 // This is an Unreal Script
-class MissionHistory_ListItem extends UITLEChallenge_ListItem dependson(MissionHistoryScreenManager);
+class MissionHistory_ListItem extends UITLEChallenge_ListItem dependson(XComGameState_MissionHistoryLogs);
 
 var MissionHistoryLogsDetails Datum;
 /*
