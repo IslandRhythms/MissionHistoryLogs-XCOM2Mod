@@ -26,16 +26,26 @@ static event InstallNewCampaign(XComGameState StartState)
 
 static event OnPostMission()
 {
-	local XComGameState_MissionHistoryLogs Log;
-	local XComGameStateContext_ChangeContainer Container;
-	local XComGameState UpdateState;
-	local XComGameStateHistory History;
+    local XComGameState_MissionHistoryLogs Log;
+    local XComGameStateContext_ChangeContainer Container;
+    local XComGameState NewGameState;
+    local XComGameStateHistory History;
 
-	History = `XCOMHISTORY;
-	Container = class 'XComGameStateContext_ChangeContainer'.static.CreateEmptyChangeContainer("Mission History Logs Update");
-	UpdateState = History.CreateNewGameState(true, Container);
-	Log = XComGameState_MissionHistoryLogs(History.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
-	Log.UpdateTableData();
+    History = `XCOMHISTORY;
+    Log = XComGameState_MissionHistoryLogs(History.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
+    
+    NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Optional Debug Comment");
+    
+    if (Log == none)
+    {
+        Log = XComGameState_MissionHistoryLogs(NewGameState.CreateNewStateObject(class'XComGameState_MissionHistoryLogs'));
+    }
+    else
+    {
+        Log = XComGameState_MissionHistoryLogs(NewGameState.ModifyStateObject(Log.Class, Log.ObjectID));
+    }
+    
+    Log.UpdateTableData();
 
-	`GAMERULES.SubmitGameState(UpdateState);
+    `GAMERULES.SubmitGameState(NewGameState);
 }
