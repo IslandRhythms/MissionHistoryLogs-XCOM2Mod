@@ -114,9 +114,11 @@ simulated function UpdateList() {
 
 // this is not being called.
 private function BuildListItems(){
-	local int i; 
+	local int i;
+	local XComGameState_MissionHistoryLogs Logs;
 	`log("Our BuildListItems function");
-	for( i= 0; i < class 'MissionHistoryScreenManager'.default.CurrentEntries.Length; i++ )
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
+	for( i= 0; i < Logs.TableData; i++ )
 	{
 		Spawn(class'MissionHistory_ListItem', List.itemContainer).InitPanel();
 	}
@@ -151,14 +153,16 @@ function SetSortType(int eSortType)
 // we do need to override sort
 function SortData()
 {
+	local XComGameState_MissionHistoryLogs Logs;
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
 	switch( header )
 	{
 	// Operation Name
-	case eMissionHistorySortType_MissionName: class 'MissionHistoryScreenManager'.default.CurrentEntries.Sort(SortByMission);	break;
-	case eMissionHistorySortType_Squad:	 class 'MissionHistoryScreenManager'.default.CurrentEntries.Sort(SortByTeam);	break;
-	case eMissionHistorySortType_Date:		 class 'MissionHistoryScreenManager'.default.CurrentEntries.Sort(SortByDate);			break;
-	case eMissionHistorySortType_Rating:		 class 'MissionHistoryScreenManager'.default.CurrentEntries.Sort(SortByRating);		break;
-	case eMissionHistorySortType_Rate:	 class 'MissionHistoryScreenManager'.default.CurrentEntries.Sort(SortByRate);		break;
+	case eMissionHistorySortType_MissionName: Logs.TableData.Sort(SortByMission);	break;
+	case eMissionHistorySortType_Squad:	 Logs.TableData.Sort(SortByTeam);	break;
+	case eMissionHistorySortType_Date:		 Logs.TableData.Sort(SortByDate);			break;
+	case eMissionHistorySortType_Rating:		 Logs.TableData.Sort(SortByRating);		break;
+	case eMissionHistorySortType_Rate:	 Logs.TableData.Sort(SortByRate);		break;
 	}
 	
 	UpdateList();
@@ -241,7 +245,6 @@ simulated function BuildHeaders()
 state LoadingItems
 {
 Begin:
-	class 'MissionHistoryScreenManager'.default.CurrentEntries.Length = 0;
 	PopulateTable();
 	LoadFinished();
 }
