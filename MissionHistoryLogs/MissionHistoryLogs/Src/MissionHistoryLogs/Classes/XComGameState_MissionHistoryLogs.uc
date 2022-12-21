@@ -179,7 +179,7 @@ function UpdateTableData() {
 	ItemData.MissionRating = rating;
 	// run this function now so the math doesn't get messed up.
 	// we do this now so if they save scum after the fact nothing gets messed up in the "db"
-	CheckForDuplicates(ItemData);
+	// CheckForDuplicates(ItemData);
 	`log("duplicates were checked for");
 	// win
 	if (BattleData.AllStrategyObjectivesCompleted()) {

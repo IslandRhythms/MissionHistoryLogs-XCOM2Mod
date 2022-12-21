@@ -27,19 +27,18 @@ enum EMissionHistorySortType
 var EMissionHistorySortType header;
 
 var localized string labels[EMissionHistorySortType.EnumCount]<BoundEnum = EMissionHistorySortType>;
-
+/*
 function PopulateTable() {
-	local XComGameState_CampaignSettings CampaignSettingsStateObject;
-	local int CampaignIndex, i;
-	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
-	CampaignIndex = CampaignSettingsStateObject.GameIndex;
-	for (i = 0; i < class 'MissionHistoryScreenManager'.default.AllEntries.Length; i++) {
-		if(class 'MissionHistoryScreenManager'.default.AllEntries[i].CampaignIndex == CampaignIndex) {
-			class 'MissionHistoryScreenManager'.default.CurrentEntries.AddItem(class 'MissionHistoryScreenManager'.default.AllEntries[i]);
+	local XComGameState_MissionHistoryLogs Logs;
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
+	for (i = 0; i < Logs.TableData.Length; i++) {
+		if(Logs.TableData[i].CampaignIndex == CampaignIndex) {
+			Logs.TableData.AddItem(class 'MissionHistoryScreenManager'.default.AllEntries[i]);
 		}
 	}
-	class 'MissionHistoryScreenManager'.default.CurrentEntries.Sort(SortByEntryIndex); // will cause crash if sort function is not there
+	Logs.TableData.Sort(SortByEntryIndex); // will cause crash if sort function is not there
 }
+*/
 
 // need to figure out how to get the correct entry
 // this is what changes the upper part of the UI to match what was selected in the bottom part.
@@ -247,6 +246,6 @@ simulated function BuildHeaders()
 state LoadingItems
 {
 Begin:
-	PopulateTable();
+	// PopulateTable();
 	LoadFinished();
 }

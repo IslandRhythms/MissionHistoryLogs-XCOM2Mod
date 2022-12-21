@@ -34,8 +34,8 @@ static event OnPostMission()
 	History = `XCOMHISTORY;
 	Container = class 'XComGameStateContext_ChangeContainer'.static.CreateEmptyChangeContainer("Mission History Logs Update");
 	UpdateState = History.CreateNewGameState(true, Container);
-	Log = History.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true);
-	Log.UpdateTableDate();
+	Log = XComGameState_MissionHistoryLogs(History.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
+	Log.UpdateTableData();
 
 	`GAMERULES.SubmitGameState(UpdateState);
 }
