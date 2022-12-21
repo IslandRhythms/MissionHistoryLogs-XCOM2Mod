@@ -89,12 +89,14 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 // need to override the following 3 functions to use our config array and struct definition
 simulated function UpdateList() {
 	local int SelIdx, ItemIndex;
+	local XComGameState_MissionHistoryLogs Logs;
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
 	
 	SelIdx = List.SelectedIndex;
 	
-	for( ItemIndex = 0; ItemIndex < class 'MissionHistoryScreenManager'.default.CurrentEntries.Length; ItemIndex++ )
+	for( ItemIndex = 0; ItemIndex < Logs.TableData.Length; ItemIndex++ )
 	{
-		MissionHistory_ListItem(List.GetItem(ItemIndex)).RefreshHistory(class 'MissionHistoryScreenManager'.default.CurrentEntries[ItemIndex]);
+		MissionHistory_ListItem(List.GetItem(ItemIndex)).RefreshHistory(Logs.TableData[ItemIndex]);
 	}
 
 	// Always select first option if using controller (and last selection is invalid)
@@ -117,8 +119,8 @@ private function BuildListItems(){
 	local int i;
 	local XComGameState_MissionHistoryLogs Logs;
 	`log("Our BuildListItems function");
-	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
-	for( i= 0; i < Logs.TableData; i++ )
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
+	for( i= 0; i < Logs.TableData.Length; i++ )
 	{
 		Spawn(class'MissionHistory_ListItem', List.itemContainer).InitPanel();
 	}
@@ -154,7 +156,7 @@ function SetSortType(int eSortType)
 function SortData()
 {
 	local XComGameState_MissionHistoryLogs Logs;
-	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
+	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
 	switch( header )
 	{
 	// Operation Name
