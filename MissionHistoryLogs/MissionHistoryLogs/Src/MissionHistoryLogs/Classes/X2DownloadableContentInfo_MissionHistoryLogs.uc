@@ -26,32 +26,16 @@ static event InstallNewCampaign(XComGameState StartState)
 
 static event OnPostMission()
 {
-	local int injured, captured, killed, total;
-	local StateObjectReference UnitRef;
-	local XComGameState_Unit Unit;
-	local string rating;
+	local XComGameState_MissionHistoryLogs Log;
+	local XComGameStateContext_ChangeContainer Container;
+	local XComGameState UpdateState;
+	local XComGameStateHistory History;
 
-	`log("====================Begin Mission History Log=======================");
-	injured = 0;
-	captured = 0;
-	killed = 0;
-	total = 0;
-	// Units can be both captured and injured as well as according to the game.
-	// Units can be dead and injured according to the game (I think) if(arrUnits[i].kAppearance.bGhostPawn)?
-	foreach `XCOMHQ.Squad(UnitRef)
-	{
-		Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
-		if (Unit.WasInjuredOnMission()) {
-			injured++;
-		}
-		if (Unit.bCaptured) {
-			captured++;
-		} else if (Unit.IsDead()) {
-			killed++;
-		}
-		total++;
+	History = `XCOMHISTORY;
+	Container = class 'XComGameStateContext_ChangeContainer'.static.CreateEmptyChangeContainer("Mission History Logs Update");
+	UpdateState = History.CreateNewGameState(true, Container);
+	Log = History.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true);
+	Log.UpdateTableDate();
 
-	}
-	rating = class 'MissionHistoryScreenManager'.static.GetMissionRating(injured, captured, killed, total);
-	class 'MissionHistoryScreenManager'.static.AppendEntry(rating);
+	`GAMERULES.SubmitGameState(UpdateState);
 }
