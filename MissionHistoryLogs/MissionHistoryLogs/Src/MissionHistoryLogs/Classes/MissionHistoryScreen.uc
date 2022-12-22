@@ -1,18 +1,8 @@
 // This is an Unreal Script
 
-// This is an Unreal Script
-
 class MissionHistoryScreen extends UITLE_ChallengeModeMenu;
 
 // I think we can take advantage of localization to override the Screen title and other header names.
-
-// check if I need this
-/*
-simulated function InitProcess() {
-// this got us the UI with invisible entries, so i consider that a win.
-	UpdateList();
-}
-*/
 
 
 enum EMissionHistorySortType
@@ -40,10 +30,8 @@ function PopulateTable() {
 }
 */
 
-// need to figure out how to get the correct entry
 // this is what changes the upper part of the UI to match what was selected in the bottom part.
 // This also sets the headers for the upper part of the UI.
-// localization doesn't appear to be working so we may just want to hardcode the values.
 // I guess it can pull any params it wants?
 simulated function OnSelectedChange(UIList ContainerList, int ItemIndex) {
 	local XComOnlineProfileSettings Profile;
@@ -83,7 +71,43 @@ simulated function OnSelectedChange(UIList ContainerList, int ItemIndex) {
 // 1. If an entry is clicked, we don't want to accidentally open a random challenge
 // 2. If an entry is clicked, don't want to accidentally cause a crash
 // 3. If we decide that we want to do something after an entry is clicked, the function we need is ready to go.
-simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {}
+simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
+	local TDialogueBoxData DialogData;
+	local MissionHistoryLogsDetails Data;
+	local String StrDetails;
+	local Texture2D StaffPicture;
+
+	// Detail = icon.Detail;
+	// SaveToPoolDetails = Detail;
+	Data = MissionHistory_ListItem(ContainerList.GetItem(ItemIndex)).Datum;
+	DialogData.eType = eDialog_Normal;
+	DialogData.strTitle = "I am a title";
+	DialogData.strAccept = class'UIDialogueBox'.default.m_strDefaultAcceptLabel;
+	/*
+	StrDetails = "Achieved rank of"@Detail.RankName@"as"@Detail.ClassName;
+	StrDetails = StrDetails $ "\nMissions participated:" @ Detail.Missions;
+	StrDetails = StrDetails $ "\nEnemies killed:" @ Detail.Kills;
+	StrDetails = StrDetails $ "\nDays served in XCOM:" @ Detail.DaysOnAvenger;
+	StrDetails = StrDetails $ "\nDays spent in infirmary:" @ Detail.DaysInjured;
+	StrDetails = StrDetails $ "\nAttacks made:" @ Detail.AttacksMade;
+	StrDetails = StrDetails $ "\nDamage dealt:" @ Detail.DamageDealt;
+	StrDetails = StrDetails $ "\nAttacks survived:" @ Detail.AttacksSurvived;
+	StrDetails = StrDetails $ "\nLost in" @ Detail.opName @"at"@ Detail.KilledDate;
+	StrDetails = StrDetails $ "\nCaptured by" @ Detail.CaptorFullName;
+	StrDetails = StrDetails $ "\n\n" $ Detail.Epitaph ;
+	*/	
+	DialogData.strText = "I am text that should show up when clicked";
+	/*
+	StaffPicture = `XENGINE.m_kPhotoManager.GetHeadshotTexture(Detail.CampaignIndex, Detail.SoldierID, 512, 512);
+	if (StaffPicture != none)
+	{
+		DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(PathName(StaffPicture));
+	}
+	*/
+
+	Movie.Pres.UIRaiseDialog( DialogData );
+
+}
 
 // need to override the following 3 functions to use our config array and struct definition
 simulated function UpdateList() {
