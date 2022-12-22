@@ -14,12 +14,14 @@ struct MissionHistoryLogsDetails {
 	var int SoldiersDeployed;
 	var int SoldiersKilled;
 	var string SuccessRate;
-	var float wins;
+	var float Wins;
 	var string Date;
 	var string MissionName;
 	var string MissionObjective;
 	var string MapName;
 	var string MapImagePath;
+	var string ObjectiveImagePath;
+	var string SoldierMVP; // Calculated by # of kills?
 	var string Squad;
 	var string Enemies;
 	var string ChosenName;
@@ -192,14 +194,14 @@ function UpdateTableData() {
 	// win
 	if (BattleData.AllStrategyObjectivesCompleted()) {
 		`log("its a win");
-		ItemData.wins = TableData[TableData.Length - 1].wins + 1.0;
-		ItemData.SuccessRate = (ItemData.wins/ (TableData.Length + 1.0)) * 100 $ "%";
+		ItemData.Wins = TableData[TableData.Length - 1].Wins + 1.0;
+		ItemData.SuccessRate = (ItemData.Wins/ (TableData.Length + 1.0)) * 100 $ "%";
 		`log("math has finished");
 	} else {
 	// loss
 		`log("its a loss");
-		ItemData.wins = TableData[TableData.Length - 1].wins;
-		ItemData.SuccessRate = (TableData[TableData.Length - 1].wins / (TableData.Length + 1.0)) * 100 $ "%";
+		ItemData.Wins = TableData[TableData.Length - 1].Wins;
+		ItemData.SuccessRate = (TableData[TableData.Length - 1].Wins / (TableData.Length + 1.0)) * 100 $ "%";
 		`log("math has finished");
 	}
 	if (Faction.FactionName == "") {
