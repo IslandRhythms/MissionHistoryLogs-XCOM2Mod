@@ -20,10 +20,10 @@ struct MissionHistoryLogsDetails {
 	var string MissionObjective;
 	var string MapName;
 	var string MapImagePath;
-	var string Squad; // will be XCOM unitl we figure out how to incorporate Squad Manager Mod
-	var string Enemies; // either the chosen name or advent
+	var string Squad;
+	var string Enemies;
 	var string ChosenName;
-	var string QuestGiver;
+	var string QuestGiver; // Reapers, Skirmishers, Templars, The Council
 	var string MissionRating; // Poor, Good, Fair, Excellent, Flawless.
 	var string MissionLocation; // city and country of the mission
 };
