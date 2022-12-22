@@ -39,7 +39,7 @@ struct SquadInformation {
 	var string SquadName;
 	var float numMissions; // declare as float for easier math later
 	var float numWins;
-}
+};
 
 
 var array<MissionHistoryLogsDetails> TableData;
