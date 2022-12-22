@@ -35,10 +35,18 @@ struct ChosenInformation {
 	var int CampaignIndex;
 };
 
+struct SquadInformation {
+	var string SquadName;
+	var float numMissions; // declare as float for easier math later
+	var float numWins;
+}
+
 
 var array<MissionHistoryLogsDetails> TableData;
 // fireaxis why
 var array<ChosenInformation> TheChosen;
+
+var array<SquadInformation> SquadData;
 
 
 function UpdateTableData() {
