@@ -7,22 +7,26 @@ class XComGameState_MissionHistoryLogs extends XComGameState_BaseObject;
 
 // 5 of these are on the top. MissionImagePath is non-negotiable
 // Another 5 on the bottom
-// 10 of these will be used, the rest are irrelevant.
+// 10 will be used, the rest go into the detailed view
 struct MissionHistoryLogsDetails {
 	var int CampaignIndex;
 	var int EntryIndex; // This is to keep track of where the entry was added into the CurrentEntries array;
-	var int SoldiersDeployed;
-	var int SoldiersKilled;
-	var string SuccessRate;
+	var int NumSoldiersDeployed;
+	var int NumSoldiersKilled; 
+	var int NumSoldiersMIA;
+	var int ForceLevel; // in BattleData: function int GetForceLevel();
 	var float Wins;
+	var string SuccessRate;
 	var string Date;
 	var string MissionName;
 	var string MissionObjective;
 	var string MapName;
 	var string MapImagePath;
 	var string ObjectiveImagePath;
-	var string SoldierMVP; // Calculated by # of kills?
-	var string Squad;
+	// XComGameState_Analytics will have the information we need to determine the MVP
+	var string SoldierMVP; // Calculated by Kills divided by Attacks made, with damage dealt and attacks survived playing a factor.
+	var string SquadName;
+	var string SoldiersDeployed;
 	var string Enemies;
 	var string ChosenName;
 	var string QuestGiver; // Reapers, Skirmishers, Templars, The Council
@@ -33,12 +37,13 @@ struct MissionHistoryLogsDetails {
 struct ChosenInformation {
 	var string ChosenType;
 	var string ChosenName;
-	var int numEncounters;
+	var int numEncounters; // XComGameState_AdventChosen.NumEncounters
 	var int CampaignIndex;
 };
 
 struct SquadInformation {
 	var string SquadName;
+	var string SoldierNames; // This may not be the same as the soldiers that were on the mission, and thats fine.
 	var float numMissions; // declare as float for easier math later
 	var float numWins;
 };
@@ -107,14 +112,14 @@ function UpdateTableData() {
 		Squad = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(SquadMgr.LastMissionSquad.ObjectID));
 		`log("what is squad name"@Squad.sSquadName);
 		if (Squad.sSquadName != "") {
-			ItemData.Squad = Squad.sSquadName;
+			ItemData.SquadName = Squad.sSquadName;
 		} else {
 			`log("The squad name is empty for some reason");
-			ItemData.Squad = "XCOM";
+			ItemData.SquadName = "XCOM";
 		}
 	} else {
 		// can also take approach of listing Unit nicknames that were on the mission.
-		ItemData.Squad = "XCOM";
+		ItemData.SquadName = "XCOM";
 	}
 	AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien', true));
 	`log("AlienHQ retrieved");
@@ -187,10 +192,6 @@ function UpdateTableData() {
 	}
 	ItemData.MissionLocation = BattleData.m_strLocation;
 	ItemData.MissionRating = rating;
-	// run this function now so the math doesn't get messed up.
-	// we do this now so if they save scum after the fact nothing gets messed up in the "db"
-	// CheckForDuplicates(ItemData);
-	`log("duplicates were checked for");
 	// win
 	if (BattleData.AllStrategyObjectivesCompleted()) {
 		`log("its a win");
