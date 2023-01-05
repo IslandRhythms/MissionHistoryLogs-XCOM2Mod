@@ -81,22 +81,25 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	// SaveToPoolDetails = Detail;
 	Data = MissionHistory_ListItem(ContainerList.GetItem(ItemIndex)).Datum;
 	DialogData.eType = eDialog_Normal;
-	DialogData.strTitle = "I am a title";
+	DialogData.strTitle = Data.MissionName;
 	DialogData.strAccept = class'UIDialogueBox'.default.m_strDefaultAcceptLabel;
-	/*
-	StrDetails = "Achieved rank of"@Detail.RankName@"as"@Detail.ClassName;
-	StrDetails = StrDetails $ "\nMissions participated:" @ Detail.Missions;
-	StrDetails = StrDetails $ "\nEnemies killed:" @ Detail.Kills;
-	StrDetails = StrDetails $ "\nDays served in XCOM:" @ Detail.DaysOnAvenger;
-	StrDetails = StrDetails $ "\nDays spent in infirmary:" @ Detail.DaysInjured;
-	StrDetails = StrDetails $ "\nAttacks made:" @ Detail.AttacksMade;
-	StrDetails = StrDetails $ "\nDamage dealt:" @ Detail.DamageDealt;
-	StrDetails = StrDetails $ "\nAttacks survived:" @ Detail.AttacksSurvived;
-	StrDetails = StrDetails $ "\nLost in" @ Detail.opName @"at"@ Detail.KilledDate;
-	StrDetails = StrDetails $ "\nCaptured by" @ Detail.CaptorFullName;
-	StrDetails = StrDetails $ "\n\n" $ Detail.Epitaph ;
-	*/	
-	DialogData.strText = "I am text that should show up when clicked";
+	StrDetails = "Troops Deployed:"@Data.NumSoldiersDeployed;
+	StrDetails = StrDetails $ "\nTroops Killed:" @ Data.NumSoldiersKilled;
+	StrDetails = StrDetails $ "\nTroops MIA:" @ Data.NumSoldiersMIA;
+	StrDetails = StrDetails $ "\nOn Map:" @ Data.MapName;
+	if (Data.Enemies != "Advent") {
+		StrDetails = StrDetails $ "\nAgainst Chosen:" @ Data.Enemies;
+		StrDetails = StrDetails $ "\n"@Data.ChosenName;
+	} else {
+		StrDetails = StrDetails $ "\nAgainst:" @ Detail.Enemies;
+	}
+	// StrDetails = StrDetails $ "\nAttacks made:" @ Detail.AttacksMade;
+	// StrDetails = StrDetails $ "\nDamage dealt:" @ Detail.DamageDealt;
+	// StrDetails = StrDetails $ "\nAttacks survived:" @ Detail.AttacksSurvived;
+	// StrDetails = StrDetails $ "\nLost in" @ Detail.opName @"at"@ Detail.KilledDate;
+	// StrDetails = StrDetails $ "\nCaptured by" @ Detail.CaptorFullName;
+	// StrDetails = StrDetails $ "\n\n" $ Detail.Epitaph ;
+	DialogData.strText = StrDetails;
 	/*
 	StaffPicture = `XENGINE.m_kPhotoManager.GetHeadshotTexture(Detail.CampaignIndex, Detail.SoldierID, 512, 512);
 	if (StaffPicture != none)

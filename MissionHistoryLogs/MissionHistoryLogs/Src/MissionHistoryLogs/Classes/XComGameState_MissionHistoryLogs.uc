@@ -119,6 +119,7 @@ function UpdateTableData() {
 		}
 	} else {
 		// can also take approach of listing Unit nicknames that were on the mission.
+		// we'll do this for now.
 		ItemData.SquadName = "XCOM";
 	}
 	AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien', true));
@@ -192,6 +193,9 @@ function UpdateTableData() {
 	}
 	ItemData.MissionLocation = BattleData.m_strLocation;
 	ItemData.MissionRating = rating;
+	ItemData.NumSoldiersKilled = killed;
+	ItemData.NumSoldiersMIA = captured;
+	ItemData.SoldierMVP = CalculateMissionMVP();
 	// win
 	if (BattleData.AllStrategyObjectivesCompleted()) {
 		`log("its a win");
@@ -266,6 +270,75 @@ function string GetMissionRating(int injured, int captured, int killed, int tota
 	{
 		return "Poor";
 	}
+}
+/*
+* Calculates the MVP of the mission
+* attacks survived, kills, kill assists, shots hit, hit %, damage, attacks made
+* rank of stats are from highest to lowest reading from left to right
+*/
+function string CalculateMissionMVP() {
+	local StateObjectReference UnitRef;
+	local XComGameState_Unit Unit;
+	local XComGameState_Analytics Analytics;
+	local String MVP, Challenger;
+	local int MVPKills;
+	local int ChallengerKills;
+	local float ShotsMade;
+	local float MVPHitPercentage, MVPAttacksMade, MVPDamageDealt, MVPAttacksSurvived, MVPShotsHit;
+	local float ChallengerHitPercentage, ChallengerAttacksMade, ChallengerDamageDealt, ChallengerAttacksSurvived, ChallengerShotsHit;
+	Analytics = XComGameState_Analytics(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_Analytics'));
+	// a dead/captured soldier can be the mvp. If they died/got captured but did better than the other units they should get it.
+	foreach `XCOMHQ.Squad(UnitRef)
+		{
+			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(UnitRef.ObjectID));
+			if (MVP == "") {
+				// Assign MVP to be the first name + nickname + lastname
+				MVP = Unit.GetName(eNameType_FullNick);
+				ShotsMade = Analytics.GetUnitFloatValue("ACC_UNIT_SHOTS_TAKEN", UnitRef);
+				MVPShotsHit = Analytics.GetUnitFloatValue("ACC_UNIT_SUCCESS_SHOTS", UnitRef);
+				MVPHitPercentage = ShotsHit/ShotsMade;
+				MVPKills = Unit.GetNumKills();
+				MVPAttacksMade = Analytics.GetUnitFloatValue("ACC_UNIT_SUCCESSFUL_ATTACKS", UnitRef);
+				MVPDamageDealt = Analytics.GetUnitFloatValue("ACC_UNIT_DEALT_DAMAGE", UnitRef);
+				MVPAttacksSurvived = Analytics.GetUnitFloatValue("ACC_UNIT_ABILITIES_RECEIVED", UnitRef);
+			} else {
+				// Compare MVP against next soldier in the squad
+				Challenger = Unit.GetName(eNameType_FullNick);
+				ChallengerAttacksSurvived = Analytics.GetUnitFloatValue("ACC_UNIT_ABILITIES_RECEIVED", UnitRef);
+				if(MVPAttacksSurvived < ChallengerAttacksSurvived) {
+					MVP = Challenger;
+					continue;
+				}
+				ChallengerKills = Unit.GetNumKills();
+				if () {
+					MVP = Challenger;
+					continue;
+				}
+				if () {
+					MVP = Challenger;
+					continue;
+				}
+				if () {
+					MVP = Challenger;
+					continue;
+				}
+				if () {
+					MVP = Challenger;
+					continue;
+				}
+				if () {
+					MVP = Challenger;
+					continue;
+				}
+				ShotsMade = Analytics.GetUnitFloatValue("ACC_UNIT_SHOTS_TAKEN", UnitRef);
+				ChallengerShotsHit = Analytics.GetUnitFloatValue("ACC_UNIT_SUCCESS_SHOTS", UnitRef);
+				ChallengerHitPercentage = ShotsHit/ShotsMade;
+				ChallengerAttacksMade = Analytics.GetUnitFloatValue("ACC_UNIT_SUCCESSFUL_ATTACKS", UnitRef);
+				ChallengerDamageDealt = Analytics.GetUnitFloatValue("ACC_UNIT_DEALT_DAMAGE", UnitRef);
+
+			}
+		}
+		return MVP;
 }
 
 
