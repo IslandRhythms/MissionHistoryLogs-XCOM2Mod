@@ -338,6 +338,10 @@ function string CalculateMissionMVP() {
 		return MVP;
 }
 
+function string GetObjectiveImagePath() {
+
+}
+
 
 DefaultProperties {
 	bSingleton=true;

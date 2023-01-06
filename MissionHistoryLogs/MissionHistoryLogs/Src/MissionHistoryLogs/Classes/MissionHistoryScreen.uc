@@ -101,11 +101,8 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	// StrDetails = StrDetails $ "\n\n" $ Detail.Epitaph ;
 	DialogData.strText = StrDetails;
 	/*
-	StaffPicture = `XENGINE.m_kPhotoManager.GetHeadshotTexture(Detail.CampaignIndex, Detail.SoldierID, 512, 512);
-	if (StaffPicture != none)
-	{
-		DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(PathName(StaffPicture));
-	}
+	DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(PathName(Data.ObjectiveImagePath));
+
 	*/
 
 	Movie.Pres.UIRaiseDialog( DialogData );
