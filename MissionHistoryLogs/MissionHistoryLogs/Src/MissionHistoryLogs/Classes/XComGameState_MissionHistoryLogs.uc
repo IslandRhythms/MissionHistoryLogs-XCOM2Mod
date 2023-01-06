@@ -15,6 +15,8 @@ struct MissionHistoryLogsDetails {
 	var int NumSoldiersKilled; 
 	var int NumSoldiersMIA;
 	var int ForceLevel; // in BattleData: function int GetForceLevel();
+	var int NumChosenEncounters;
+	var float WinPercentageAgainstChosen;
 	var float Wins;
 	var string SuccessRate;
 	var string Date;
@@ -37,7 +39,7 @@ struct MissionHistoryLogsDetails {
 struct ChosenInformation {
 	var string ChosenType;
 	var string ChosenName;
-	var int numEncounters; // XComGameState_AdventChosen.NumEncounters
+	var int NumEncounters; // XComGameState_AdventChosen.NumEncounters
 	var int CampaignIndex;
 };
 
@@ -138,24 +140,28 @@ function UpdateTableData() {
 		`log("there wa no chosen");
 		ItemData.Enemies = "Advent";
 	}
-	else if (ChosenState.numEncounters == 1) {
+	else if (ChosenState.NumEncounters == 1) {
 		`log("our first encounter with this chosen");
 		MiniBoss.ChosenType = string(ChosenState.GetMyTemplateName());
 		MiniBoss.ChosenType = Split(MiniBoss.ChosenType, "_", true);
 		MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-		MiniBoss.numEncounters = 1;
+		MiniBoss.NumEncounters = 1;
 		MiniBoss.CampaignIndex = CampaignIndex;
 		TheChosen.AddItem(MiniBoss);
 		ItemData.ChosenName = MiniBoss.ChosenName;
 		ItemData.Enemies = MiniBoss.ChosenType;
-	} else if (ChosenState.numEncounters > 1) {
+		ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+		ItemData.WinPercentageAgainstChosen = float(ChosenState.NumDefeats / ChosenState.NumEncounters);
+	} else if (ChosenState.NumEncounters > 1) {
 		`log("we've encountered them before");
 		for (Index = 0; Index < TheChosen.Length; Index++) {
 			ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-			if (TheChosen[Index].CampaignIndex == CampaignIndex && TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].numEncounters != ChosenState.numEncounters) {
-				TheChosen[Index].numEncounters = ChosenState.numEncounters;
+			if (TheChosen[Index].CampaignIndex == CampaignIndex && TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
+				TheChosen[Index].NumEncounters = ChosenState.NumEncounters;
 				ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 				ItemData.Enemies = TheChosen[Index].ChosenType;
+				ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+				ItemData.WinPercentageAgainstChosen = float(ChosenState.NumDefeats / ChosenState.NumEncounters);
 				break;
 			}
 		}
@@ -166,6 +172,7 @@ function UpdateTableData() {
 
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 	`log("got battle data");
+	ItemData.ForceLevel = BattleData.GetForceLevel();
 	MissionTemplate = MissionTemplateManager.FindMissionTemplate(BattleData.MapData.ActiveMission.MissionName);
 	`log("Got mission template");
 	ParcelManager = `PARCELMGR;

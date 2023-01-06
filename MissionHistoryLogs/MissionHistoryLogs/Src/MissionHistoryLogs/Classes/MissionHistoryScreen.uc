@@ -79,7 +79,7 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 
 	// Detail = icon.Detail;
 	// SaveToPoolDetails = Detail;
-	Data = MissionHistory_ListItem(ContainerList.GetItem(ItemIndex)).Datum;
+	Data = MissionHistory_ListItem(ContainerList.GetItem(ListItemIndex)).Datum;
 	DialogData.eType = eDialog_Normal;
 	DialogData.strTitle = Data.MissionName;
 	DialogData.strAccept = class'UIDialogueBox'.default.m_strDefaultAcceptLabel;
@@ -90,19 +90,16 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	if (Data.Enemies != "Advent") {
 		StrDetails = StrDetails $ "\nAgainst Chosen:" @ Data.Enemies;
 		StrDetails = StrDetails $ "\n"@Data.ChosenName;
+		StrDetails = StrDetails $ "\nNumber of times XCOM has encountered this chosen"@Data.NumChosenEncounters;
+		StrDetails = StrDetails $ "\nXCOM's win rate against this chosen"@(Data.WinPercentageAgainstChosen*100)$"%";
 	} else {
 		StrDetails = StrDetails $ "\nAgainst:" @ Data.Enemies;
 	}
+	StrDetails = StrDetails $ "\nWith a force level of"@Data.ForceLevel;
 	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
-	// StrDetails = StrDetails $ "\nDamage dealt:" @ Detail.DamageDealt;
-	// StrDetails = StrDetails $ "\nAttacks survived:" @ Detail.AttacksSurvived;
-	// StrDetails = StrDetails $ "\nLost in" @ Detail.opName @"at"@ Detail.KilledDate;
-	// StrDetails = StrDetails $ "\nCaptured by" @ Detail.CaptorFullName;
-	// StrDetails = StrDetails $ "\n\n" $ Detail.Epitaph ;
 	DialogData.strText = StrDetails;
 	/*
 	DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(PathName(Data.ObjectiveImagePath));
-
 	*/
 
 	Movie.Pres.UIRaiseDialog( DialogData );
@@ -199,7 +196,7 @@ simulated function int SortByMission(MissionHistoryLogsDetails A, MissionHistory
 }
 simulated function int SortByTeam(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B)
 {
-	return SortAlphabetically(A.Squad, B.Squad);
+	return SortAlphabetically(A.SquadName, B.SquadName);
 }
 simulated function int SortByDate(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {
 	return SortAlphabetically(A.Date, B.Date);

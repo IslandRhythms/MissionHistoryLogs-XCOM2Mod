@@ -20,7 +20,7 @@ simulated function FillTable() {
 	MC.BeginFunctionOp("UpdateData");
 	
 	MC.QueueString(Datum.MissionName);		// Mission
-	MC.QueueString(Datum.Squad);	// Squad
+	MC.QueueString(Datum.SquadName);	// Squad
 	MC.QueueString(Datum.Date);			// Date
 	MC.QueueString(Datum.MissionRating);				// Rating
 	MC.QueueString(Datum.SuccessRate);			// Rate
