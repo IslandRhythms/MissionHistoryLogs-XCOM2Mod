@@ -299,43 +299,43 @@ function string CalculateMissionMVP() {
 			if (MVP == "") {
 				// Assign MVP to be the first name + nickname + lastname
 				MVP = Unit.GetName(eNameType_FullNick);
-				ShotsMade = Analytics.GetTacticalFloatValue("ACC_UNIT_SHOTS_TAKEN", UnitRef);
-				MVPShotsHit = Analytics.GetTacticalFloatValue("ACC_UNIT_SUCCESS_SHOTS", UnitRef);
+				ShotsMade = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_SHOTS_TAKEN"));
+				MVPShotsHit = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_SUCCESS_SHOTS"));
 				MVPHitPercentage = MVPShotsHit/ShotsMade;
-				MVPKills = Analytics.GetTacticalFloatValue("ACC_UNIT_KILLS", UnitRef);
-				MVPAttacksMade = Analytics.GetTacticalFloatValue("ACC_UNIT_SUCCESSFUL_ATTACKS", UnitRef);
-				MVPDamageDealt = Analytics.GetTacticalFloatValue("ACC_UNIT_DEALT_DAMAGE", UnitRef);
-				MVPAttacksSurvived = Analytics.GetTacticalFloatValue("ACC_UNIT_ABILITIES_RECEIVED", UnitRef);
+				MVPKills = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_KILLS"));
+				MVPAttacksMade = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_SUCCESSFUL_ATTACKS"));
+				MVPDamageDealt = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_DEALT_DAMAGE"));
+				MVPAttacksSurvived = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_ABILITIES_RECEIVED"));
 			} else {
 				// Compare MVP against next soldier in the squad
 				Challenger = Unit.GetName(eNameType_FullNick);
-				ChallengerAttacksSurvived = Analytics.GetUnitFloatValue("ACC_UNIT_ABILITIES_RECEIVED", UnitRef);
+				ChallengerAttacksSurvived = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_ABILITIES_RECEIVED"));
 				if(MVPAttacksSurvived < ChallengerAttacksSurvived) {
 					MVP = Challenger;
 					continue;
 				}
-				ChallengerKills = Analytics.GetTacticalFloatValue("ACC_UNIT_KILLS", UnitRef);
+				ChallengerKills = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_KILLS"));
 				if (MVPKills < ChallengerKills) {
 					MVP = Challenger;
 					continue;
 				}
-				ChallengerShotsHit = Analytics.GetUnitFloatValue("ACC_UNIT_SUCCESS_SHOTS", UnitRef);
+				ChallengerShotsHit = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_SUCCESS_SHOTS"));
 				if (MVPShotsHit < ChallengerShotsHit) {
 					MVP = Challenger;
 					continue;
 				}
-				ShotsMade = Analytics.GetUnitFloatValue("ACC_UNIT_SHOTS_TAKEN", UnitRef);
+				ShotsMade = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_SHOTS_TAKEN"));
 				ChallengerHitPercentage = ChallengerShotsHit/ShotsMade;
 				if (MVPHitPercentage < ChallengerHitPercentage) {
 					MVP = Challenger;
 					continue;
 				}
-				ChallengerAttacksMade = Analytics.GetUnitFloatValue("ACC_UNIT_SUCCESSFUL_ATTACKS", UnitRef);
+				ChallengerAttacksMade = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_SUCCESSFUL_ATTACKS"));
 				if (MVPAttacksMade < ChallengerAttacksMade) {
 					MVP = Challenger;
 					continue;
 				}
-				ChallengerDamageDealt = Analytics.GetUnitFloatValue("ACC_UNIT_DEALT_DAMAGE", UnitRef);
+				ChallengerDamageDealt = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_DEALT_DAMAGE"));
 				if (MVPDamageDealt < ChallengerDamageDealt) {
 					MVP = Challenger;
 					continue;
@@ -343,6 +343,11 @@ function string CalculateMissionMVP() {
 			}
 		}
 		return MVP;
+}
+
+// this is what analytics does
+simulated function string BuildUnitMetric(int UnitID, string Metric) {
+	return "UNIT_"$UnitID$"_"$Metric;
 }
 
 function string GetObjectiveImagePath() {
