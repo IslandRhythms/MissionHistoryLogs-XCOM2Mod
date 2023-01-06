@@ -91,9 +91,9 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 		StrDetails = StrDetails $ "\nAgainst Chosen:" @ Data.Enemies;
 		StrDetails = StrDetails $ "\n"@Data.ChosenName;
 	} else {
-		StrDetails = StrDetails $ "\nAgainst:" @ Detail.Enemies;
+		StrDetails = StrDetails $ "\nAgainst:" @ Data.Enemies;
 	}
-	// StrDetails = StrDetails $ "\nAttacks made:" @ Detail.AttacksMade;
+	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
 	// StrDetails = StrDetails $ "\nDamage dealt:" @ Detail.DamageDealt;
 	// StrDetails = StrDetails $ "\nAttacks survived:" @ Detail.AttacksSurvived;
 	// StrDetails = StrDetails $ "\nLost in" @ Detail.opName @"at"@ Detail.KilledDate;
