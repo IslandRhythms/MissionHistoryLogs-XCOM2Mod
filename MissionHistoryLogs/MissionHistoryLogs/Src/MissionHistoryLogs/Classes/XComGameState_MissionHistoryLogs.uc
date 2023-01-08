@@ -449,6 +449,8 @@ function string CalculateMissionMVP() {
 simulated function string BuildUnitMetric(int UnitID, string Metric) {
 	return "UNIT_"$UnitID$"_"$Metric;
 }
+
+// function string GetObjectiveImagePath(obj) {}
 /* Template for how to set image for the expanded view
 function string GetObjectiveImagePath() {
 	local string StrButtonIcon;
