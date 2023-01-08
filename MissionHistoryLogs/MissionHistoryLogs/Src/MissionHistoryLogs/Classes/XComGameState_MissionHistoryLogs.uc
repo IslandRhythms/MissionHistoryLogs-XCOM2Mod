@@ -14,7 +14,10 @@ struct MissionHistoryLogsDetails {
 	var int NumSoldiersDeployed;
 	var int NumSoldiersKilled; 
 	var int NumSoldiersMIA;
+	var int NumSoldiersInjured;
 	var int ForceLevel; // in BattleData: function int GetForceLevel();
+	var int NumEnemiesDeployed;
+	var int NumEnemiesKilled;
 	var int NumChosenEncounters;
 	var float WinPercentageAgainstChosen;
 	var float Wins;
@@ -137,7 +140,7 @@ function UpdateTableData() {
 	// we need to keep track of this because any variable that could help us do this is only valid in the tactical layer.
 	// for some reason when it gets to strategy, any variable that could help us determine if the chosen was on the most recent mission gets wiped.
 	if (ChosenState.FirstName == "") {
-		`log("there wa no chosen");
+		`log("there was no chosen");
 		ItemData.Enemies = "Advent";
 	}
 	else if (ChosenState.NumEncounters == 1) {
@@ -151,7 +154,9 @@ function UpdateTableData() {
 		ItemData.ChosenName = MiniBoss.ChosenName;
 		ItemData.Enemies = MiniBoss.ChosenType;
 		ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+		`log("ChosenState.NumDefeats"@ChosenState.NumDefeats@"ChosenState.NumEncounters"@ChosenState.NumEncounters"@ChosenState.NumEncounters);
 		ItemData.WinPercentageAgainstChosen = float(ChosenState.NumDefeats / ChosenState.NumEncounters);
+		`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 	} else if (ChosenState.NumEncounters > 1) {
 		`log("we've encountered them before");
 		for (Index = 0; Index < TheChosen.Length; Index++) {
@@ -171,6 +176,8 @@ function UpdateTableData() {
 	}
 
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	ItemData.NumEnemiesKilled = GetNumEnemiesKilled(BattleData);
+	ItemData.NumEnemiesDeployed = GetNumEnemiesDeployed(BattleData);
 	`log("got battle data");
 	ItemData.ForceLevel = BattleData.GetForceLevel();
 	MissionTemplate = MissionTemplateManager.FindMissionTemplate(BattleData.MapData.ActiveMission.MissionName);
@@ -200,11 +207,15 @@ function UpdateTableData() {
 	}
 	ItemData.MissionLocation = BattleData.m_strLocation;
 	ItemData.MissionRating = rating;
+	ItemData.NumSoldiersDeployed = total;
 	ItemData.NumSoldiersKilled = killed;
 	ItemData.NumSoldiersMIA = captured;
+	ItemData.NumSoldiersInjured = injured;
 	ItemData.SoldierMVP = CalculateMissionMVP();
 	// win
-	if (BattleData.AllStrategyObjectivesCompleted()) {
+	// do we want to count missions where the objective was completed but everyone died as a success or failure?
+	// I think mission aborted checks the case where its a win but you evaced
+	if (BattleData.bLocalPlayerWon && !BattleData.bMissionAborted) {
 		`log("its a win");
 		ItemData.Wins = TableData[TableData.Length - 1].Wins + 1.0;
 		ItemData.SuccessRate = (ItemData.Wins/ (TableData.Length + 1.0)) * 100 $ "%";
@@ -241,6 +252,71 @@ function bool IsModActive(name ModName)
         }
     }
     return false;
+}
+
+function int GetNumEnemiesKilled(XComGameState_BattleData BattleData) {
+	local array<XComGameState_Unit> arrUnits;
+	local XGAIPlayer_TheLost LostPlayer;
+	local int iKilled;
+	local int i;
+
+	BATTLE().GetAIPlayer().GetOriginalUnits(arrUnits);
+	LostPlayer = BATTLE().GetTheLostPlayer();
+	if (LostPlayer != none) { LostPlayer.GetOriginalUnits(arrUnits); }
+	if(class'CHHelpers'.static.TeamOneRequired()) // issue #188 - account for added enemy teams
+	{
+		class'CHHelpers'.static.GetTeamOnePlayer().GetOriginalUnits(arrUnits);
+	}
+		
+	if(class'CHHelpers'.static.TeamTwoRequired()) // issue #188 - account for added enemy teams
+	{
+		class'CHHelpers'.static.GetTeamTwoPlayer().GetOriginalUnits(arrUnits);
+	}
+	for(i = 0; i < arrUnits.Length; i++)
+	{
+		if(arrUnits[i].IsDead())
+		{
+			iKilled++;
+		}
+	}
+
+	// add in any aliens from the transfer state
+	if(BattleData.DirectTransferInfo.IsDirectMissionTransfer)
+	{
+		iKilled += BattleData.DirectTransferInfo.AliensKilled;
+	}
+	return iKilled;
+}
+
+function int GetNumEnemiesDeployed(XComGameState_BattleData BattleData) {
+	local array<XComGameState_Unit> arrUnits;
+	local XGAIPlayer_TheLost LostPlayer;
+	local int iTotal;
+
+	BATTLE().GetAIPlayer().GetOriginalUnits(arrUnits);
+	LostPlayer = BATTLE().GetTheLostPlayer();
+	if (LostPlayer != none) { LostPlayer.GetOriginalUnits(arrUnits); }
+	if(class'CHHelpers'.static.TeamOneRequired()) // issue #188 - account for added enemy teams
+	{
+		class'CHHelpers'.static.GetTeamOnePlayer().GetOriginalUnits(arrUnits);
+	}
+		
+	if(class'CHHelpers'.static.TeamTwoRequired()) // issue #188 - account for added enemy teams
+	{
+		class'CHHelpers'.static.GetTeamTwoPlayer().GetOriginalUnits(arrUnits);
+	}
+	iTotal = arrUnits.Length;
+	// add in any aliens from the transfer state
+	if(BattleData.DirectTransferInfo.IsDirectMissionTransfer)
+	{
+		iTotal += BattleData.DirectTransferInfo.AliensSeen;
+	}
+
+	return iTotal;
+}
+
+function XGBattle_SP BATTLE() {
+	return XGBattle_SP(`BATTLE);
 }
 
 
@@ -349,10 +425,94 @@ function string CalculateMissionMVP() {
 simulated function string BuildUnitMetric(int UnitID, string Metric) {
 	return "UNIT_"$UnitID$"_"$Metric;
 }
-
+/* Template for how to set image for the expanded view
 function string GetObjectiveImagePath() {
+	local string StrButtonIcon;
+
+	switch(Source)
+	{
+	case 'MissionSource_LandedUFO':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Advent";
+		break;
+	case 'MissionSource_AlienNetwork':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Alien";
+		break;
+	case 'MissionSource_Council':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Council";
+		break;
+	case 'MissionSource_GuerillaOp':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_GOPS";
+		break;
+	case 'MissionSource_Retaliation':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Retaliation";
+		if (GeneratedMission.Mission.MissionName == 'ChosenRetaliation')
+		{
+			StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Retaliation";
+		}
+		break;
+	case 'MissionSource_BlackSite':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Blacksite";
+		break;
+	case 'MissionSource_Forge':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Forge";
+		break;
+	case 'MissionSource_PsiGate':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_PsiGate";
+		break;
+	case 'MissionSource_Broadcast':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_FinalMission";
+		break;
+	case 'MissionSource_Final':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_AlienFortress";
+		break;
+	case 'MissionSource_SupplyRaid':
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_SupplyRaid";
+		if (GeneratedMission.Mission.MissionName == 'SupplyExtraction')
+		{
+			StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_SupplyExtraction";
+		}
+		break;
+	case 'MissionSource_LostAndAbandoned':
+	case 'MissionSource_ResistanceOp':
+		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_ResOps";
+		break;
+	case 'MissionSource_RescueSoldier':
+		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_RescueSoldier";
+		break;
+	case 'MissionSource_ChosenAmbush':
+		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_EscapeAmbush";
+		break;
+	case 'MissionSource_ChosenStronghold':
+		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_ChosenStronghold";
+		break;
+	default:
+		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_GoldenPath";
+	};
+
+	// Start Issue #537
+	TriggerOverrideMissionSiteIconImage(StrButtonIcon);
+	// End Issue #537
+
+	return StrButtonIcon;
 
 }
+
+simulated function TriggerOverrideMissionSiteIconImage(out string ImagePath)
+{
+	local XComLWTuple Tuple;
+
+	Tuple = new class'XComLWTuple';
+	Tuple.Id = 'OverrideMissionSiteIconImage';
+	Tuple.Data.Add(1);
+	Tuple.Data[0].Kind = XComLWTVString;
+	Tuple.Data[0].s = ImagePath;
+
+	`XEVENTMGR.TriggerEvent('OverrideMissionSiteIconImage', Tuple, self);
+
+	ImagePath = Tuple.Data[0].s;
+}
+*/
+
 
 
 DefaultProperties {

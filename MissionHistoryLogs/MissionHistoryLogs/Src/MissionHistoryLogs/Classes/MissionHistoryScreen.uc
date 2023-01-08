@@ -89,7 +89,7 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	StrDetails = StrDetails $ "\nOn Map:" @ Data.MapName;
 	if (Data.Enemies != "Advent") {
 		StrDetails = StrDetails $ "\nAgainst Chosen:" @ Data.Enemies;
-		StrDetails = StrDetails $ "\n"@Data.ChosenName;
+		StrDetails = StrDetails $ "\n"$Data.ChosenName;
 		StrDetails = StrDetails $ "\nNumber of times XCOM has encountered this chosen"@Data.NumChosenEncounters;
 		StrDetails = StrDetails $ "\nXCOM's win rate against this chosen"@(Data.WinPercentageAgainstChosen*100)$"%";
 	} else {
