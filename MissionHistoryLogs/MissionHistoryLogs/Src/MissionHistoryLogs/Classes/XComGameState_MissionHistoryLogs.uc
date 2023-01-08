@@ -154,7 +154,8 @@ function UpdateTableData() {
 		ItemData.ChosenName = MiniBoss.ChosenName;
 		ItemData.Enemies = MiniBoss.ChosenType;
 		ItemData.NumChosenEncounters = ChosenState.NumEncounters;
-		`log("ChosenState.NumDefeats"@ChosenState.NumDefeats@"ChosenState.NumEncounters"@ChosenState.NumEncounters"@ChosenState.NumEncounters);
+		`log("ChosenState.NumDefeats"@ChosenState.NumDefeats);
+		`log("ChosenState.NumEncounters"@ChosenState.NumEncounters);
 		ItemData.WinPercentageAgainstChosen = float(ChosenState.NumDefeats / ChosenState.NumEncounters);
 		`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 	} else if (ChosenState.NumEncounters > 1) {
@@ -176,6 +177,7 @@ function UpdateTableData() {
 	}
 
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	`log("Another avenue to calculate chosen win rate, chosen vars on battle data"@BattleData.bChosenLost);
 	ItemData.NumEnemiesKilled = GetNumEnemiesKilled(BattleData);
 	ItemData.NumEnemiesDeployed = GetNumEnemiesDeployed(BattleData);
 	`log("got battle data");
