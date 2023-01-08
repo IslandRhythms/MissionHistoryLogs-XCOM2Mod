@@ -31,7 +31,7 @@ struct MissionHistoryLogsDetails {
 	// XComGameState_Analytics will have the information we need to determine the MVP
 	var string SoldierMVP; // Calculated by function
 	var string SquadName;
-	var string SoldiersDeployed;
+	var string SoldiersDeployed; // The Soldiers that make up the squad, currently unused.
 	var string Enemies;
 	var string ChosenName;
 	var string QuestGiver; // Reapers, Skirmishers, Templars, The Council

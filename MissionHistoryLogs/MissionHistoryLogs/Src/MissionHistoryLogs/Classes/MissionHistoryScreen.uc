@@ -84,8 +84,9 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	DialogData.strTitle = Data.MissionName;
 	DialogData.strAccept = class'UIDialogueBox'.default.m_strDefaultAcceptLabel;
 	StrDetails = "Troops Deployed:"@Data.NumSoldiersDeployed;
-	StrDetails = StrDetails $ "\nTroops Killed:" @ Data.NumSoldiersKilled;
+	StrDetails = StrDetails $ "\nTroops Injured:"@Data.NumSoldiersInjured;
 	StrDetails = StrDetails $ "\nTroops MIA:" @ Data.NumSoldiersMIA;
+	StrDetails = StrDetails $ "\nTroops Killed:" @ Data.NumSoldiersKilled;
 	StrDetails = StrDetails $ "\nOn Map:" @ Data.MapName;
 	if (Data.Enemies != "Advent") {
 		StrDetails = StrDetails $ "\nAgainst Chosen:" @ Data.Enemies;
@@ -95,6 +96,8 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	} else {
 		StrDetails = StrDetails $ "\nAgainst:" @ Data.Enemies;
 	}
+	StrDetails = StrDetails $ "\nAdvent Deployed:"@Data.NumEnemiesDeployed;
+	StrDetails = StrDetails $ "\nXCOM Wiped:"@Data.NumEnemiesKilled;
 	StrDetails = StrDetails $ "\nWith a force level of"@Data.ForceLevel;
 	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
 	DialogData.strText = StrDetails;
