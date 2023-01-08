@@ -43,6 +43,7 @@ struct ChosenInformation {
 	var string ChosenType;
 	var string ChosenName;
 	var int NumEncounters; // XComGameState_AdventChosen.NumEncounters
+	var int NumDefeats; // How many times has XCOM defeated this chosen
 	var int CampaignIndex;
 };
 
@@ -137,6 +138,7 @@ function UpdateTableData() {
 	`log("Mission Template Manager Retrieved");
 	History = class'XComGameStateHistory'.static.GetGameStateHistory();
 	`log("History Retrieved");
+	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
 	// we need to keep track of this because any variable that could help us do this is only valid in the tactical layer.
 	// for some reason when it gets to strategy, any variable that could help us determine if the chosen was on the most recent mission gets wiped.
 	if (ChosenState.FirstName == "") {
@@ -150,24 +152,28 @@ function UpdateTableData() {
 		MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 		MiniBoss.NumEncounters = 1;
 		MiniBoss.CampaignIndex = CampaignIndex;
+		if (BattleData.bChosenLost) {
+			MiniBoss.NumDefeats += 1;
+		}
 		TheChosen.AddItem(MiniBoss);
 		ItemData.ChosenName = MiniBoss.ChosenName;
 		ItemData.Enemies = MiniBoss.ChosenType;
 		ItemData.NumChosenEncounters = ChosenState.NumEncounters;
-		`log("ChosenState.NumDefeats"@ChosenState.NumDefeats);
-		`log("ChosenState.NumEncounters"@ChosenState.NumEncounters);
-		ItemData.WinPercentageAgainstChosen = float(ChosenState.NumDefeats / ChosenState.NumEncounters);
+		ItemData.WinPercentageAgainstChosen = float(MiniBoss.NumDefeats / MiniBoss.NumEncounters);
 		`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 	} else if (ChosenState.NumEncounters > 1) {
 		`log("we've encountered them before");
 		for (Index = 0; Index < TheChosen.Length; Index++) {
 			ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-			if (TheChosen[Index].CampaignIndex == CampaignIndex && TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
+			if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
 				TheChosen[Index].NumEncounters = ChosenState.NumEncounters;
+				if(BattleData.bChosenLost) {
+					TheChosen[Index].NumDefeats += 1;
+				}
 				ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 				ItemData.Enemies = TheChosen[Index].ChosenType;
 				ItemData.NumChosenEncounters = ChosenState.NumEncounters;
-				ItemData.WinPercentageAgainstChosen = float(ChosenState.NumDefeats / ChosenState.NumEncounters);
+				ItemData.WinPercentageAgainstChosen = float(TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters);
 				break;
 			}
 		}
@@ -175,15 +181,10 @@ function UpdateTableData() {
 		`log("Some weird case we didn't cover");
 		ItemData.Enemies = "Advent";
 	}
-
-	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-	`log("Another avenue to calculate chosen win rate, chosen vars on battle data"@BattleData.bChosenLost);
 	ItemData.NumEnemiesKilled = GetNumEnemiesKilled(BattleData);
 	ItemData.NumEnemiesDeployed = GetNumEnemiesDeployed(BattleData);
-	`log("got battle data");
 	ItemData.ForceLevel = BattleData.GetForceLevel();
 	MissionTemplate = MissionTemplateManager.FindMissionTemplate(BattleData.MapData.ActiveMission.MissionName);
-	`log("Got mission template");
 	ParcelManager = `PARCELMGR;
 	ParcelManager.GetValidPlotsForMission(ValidPlots, BattleData.MapData.ActiveMission);
 
@@ -214,13 +215,20 @@ function UpdateTableData() {
 	ItemData.NumSoldiersMIA = captured;
 	ItemData.NumSoldiersInjured = injured;
 	ItemData.SoldierMVP = CalculateMissionMVP();
+	if (TableData.Length > 1) {
+		TableData.Sort(sortByWins);
+	}
+	for (Index = 0; Index < TableData.Length; Index++) {
+		`log("Is the array sorted?"@TableData[Index].Wins);
+	}
 	// win
-	// do we want to count missions where the objective was completed but everyone died as a success or failure?
-	// I think mission aborted checks the case where its a win but you evaced
-	if (BattleData.bLocalPlayerWon && !BattleData.bMissionAborted) {
+	if (BattleData.AllStrategyObjectivesCompleted()) {
 		`log("its a win");
 		ItemData.Wins = TableData[TableData.Length - 1].Wins + 1.0;
+		`log("number of wins is"@ItemData.Wins);
 		ItemData.SuccessRate = (ItemData.Wins/ (TableData.Length + 1.0)) * 100 $ "%";
+		`log("denominator is the number plus 1"@TableData.Length);
+		`log("success rate is"@ItemData.SuccessRate);
 		`log("math has finished");
 	} else {
 	// loss
@@ -237,6 +245,20 @@ function UpdateTableData() {
 	`log("faction name assigned");
 	TableData.AddItem(ItemData);
 	`log("everything was saved");
+}
+
+function int sortByWins(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {
+	return sortNumerically(A.Wins, B.Wins);
+}
+// we want the entry with the greatest numbner of wins to be the last entry.
+function int sortNumerically(float A, float B) {
+	if (A < B) {
+		return 1;
+	} else if (A > B) {
+		return -1;
+	} else {
+		return 0;
+	}
 }
 
 function bool IsModActive(name ModName)
