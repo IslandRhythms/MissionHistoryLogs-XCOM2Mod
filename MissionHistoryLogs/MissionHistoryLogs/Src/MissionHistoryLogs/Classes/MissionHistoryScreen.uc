@@ -17,18 +17,6 @@ enum EMissionHistorySortType
 var EMissionHistorySortType header;
 
 var localized string labels[EMissionHistorySortType.EnumCount]<BoundEnum = EMissionHistorySortType>;
-/*
-function PopulateTable() {
-	local XComGameState_MissionHistoryLogs Logs;
-	Logs = XComGameState_MissionHistoryLogs(`XCOMHISTORY.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
-	for (i = 0; i < Logs.TableData.Length; i++) {
-		if(Logs.TableData[i].CampaignIndex == CampaignIndex) {
-			Logs.TableData.AddItem(class 'MissionHistoryScreenManager'.default.AllEntries[i]);
-		}
-	}
-	Logs.TableData.Sort(SortByEntryIndex); // will cause crash if sort function is not there
-}
-*/
 
 // this is what changes the upper part of the UI to match what was selected in the bottom part.
 // This also sets the headers for the upper part of the UI.
@@ -77,8 +65,6 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	local String StrDetails;
 	local Texture2D StaffPicture;
 
-	// Detail = icon.Detail;
-	// SaveToPoolDetails = Detail;
 	Data = MissionHistory_ListItem(ContainerList.GetItem(ListItemIndex)).Datum;
 	DialogData.eType = eDialog_Normal;
 	DialogData.strTitle = Data.MissionName;
@@ -139,7 +125,6 @@ simulated function UpdateList() {
 
 }
 
-// this is not being called.
 private function BuildListItems(){
 	local int i;
 	local XComGameState_MissionHistoryLogs Logs;
@@ -272,6 +257,5 @@ simulated function BuildHeaders()
 state LoadingItems
 {
 Begin:
-	// PopulateTable();
 	LoadFinished();
 }
