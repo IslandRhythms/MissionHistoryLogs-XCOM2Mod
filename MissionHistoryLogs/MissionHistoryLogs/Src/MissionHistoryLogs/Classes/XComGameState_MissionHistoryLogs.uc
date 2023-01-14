@@ -37,6 +37,9 @@ struct MissionHistoryLogsDetails {
 	var string QuestGiver; // Reapers, Skirmishers, Templars, The Council
 	var string MissionRating; // Poor, Good, Fair, Excellent, Flawless.
 	var string MissionLocation; // city and country of the mission
+	var string VIP;
+	var string SoldierVIPOne;
+	var string SoldierVIPTwo;
 };
 
 struct ChosenInformation {
@@ -139,10 +142,24 @@ function UpdateTableData() {
 	History = class'XComGameStateHistory'.static.GetGameStateHistory();
 	`log("History Retrieved");
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (MissionDetails.IsVIPMission()) {
+	// need to check if everyone was rescued before assigning.
+		Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[0].ObjectID));
+		ItemData.VIP = Unit.FirstName $ " " $ Unit.LastName;
+		// Soldier A and Soldier B
+		if (BattleData.RewardUnits.Length > 2) {
+			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[1].ObjectID));
+			ItemData.SoldierVIPOne = Unit.FirstName $ " " $ Unit.NickName $ " " $ Unit.LastName;
+			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[2].ObjectID));
+			ItemData.SoldierVIPTwo = Unit.FirstName $ " " $ Unit.NickName $ " " $ Unit.LastName;
+		} else if (BattleData.RewardUnits.Length > 1) { // Only Soldier A
+			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[1].ObjectID));
+			ItemData.SoldierVIPOne = Unit.FirstName $ " " $ Unit.NickName $ " " $ Unit.LastName;
+		}
+	}
 	// we need to keep track of this because any variable that could help us do this is only valid in the tactical layer.
 	// for some reason when it gets to strategy, any variable that could help us determine if the chosen was on the most recent mission gets wiped.
 	if (ChosenState.FirstName == "") {
-		`log("there was no chosen");
 		ItemData.Enemies = "Advent";
 	}
 	else if (ChosenState.NumEncounters == 1) {
@@ -168,11 +185,14 @@ function UpdateTableData() {
 			if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
 				TheChosen[Index].NumEncounters = ChosenState.NumEncounters;
 				if(BattleData.bChosenLost) {
+					`log("the chosen was defeated this mission");
 					TheChosen[Index].NumDefeats += 1;
 				}
 				ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 				ItemData.Enemies = TheChosen[Index].ChosenType;
 				ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+				`log("what is the number of encounters"@ChosenState.NumEncounters);
+				`log("what is the number of defeats"@ChosenState.NumDefeats);
 				ItemData.WinPercentageAgainstChosen = float(TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters);
 				break;
 			}
@@ -205,8 +225,10 @@ function UpdateTableData() {
 	// Gatecrasher's objective is the same as the op name and thats lame.
 	if (BattleData.m_strOpName == "Operation Gatecrasher") {
 		ItemData.MissionObjective = "Send a Message";
+		ItemData.ObjectiveImagePath = "uilibrary_strategyimages.X2StrategyMap.Alert_Resistance_Ops_Appear";
 	} else {
 		ItemData.MissionObjective = MissionTemplate.DisplayName;
+		ItemData.ObjectiveImagePath = GetObjectiveImagePath(MissionTemplate.DisplayName);
 	}
 	ItemData.MissionLocation = BattleData.m_strLocation;
 	ItemData.MissionRating = rating;
@@ -222,7 +244,7 @@ function UpdateTableData() {
 		`log("Is the array sorted?"@TableData[Index].Wins);
 	}
 	// win
-	if (BattleData.AllStrategyObjectivesCompleted()) {
+	if (BattleData.bLocalPlayerWon) {
 		`log("its a win");
 		ItemData.Wins = TableData[TableData.Length - 1].Wins + 1.0;
 		`log("number of wins is"@ItemData.Wins);
@@ -260,6 +282,7 @@ function int sortNumerically(float A, float B) {
 		return 0;
 	}
 }
+
 
 function bool IsModActive(name ModName)
 {
@@ -354,10 +377,7 @@ function string GetMissionRating(int injured, int captured, int killed, int tota
 	iCaptured = captured;
 	iPercentageKilled = ((iKilled + iCaptured) * 100) / total;
 	iInjured = injured;
-	if (!BattleData.AllStrategyObjectivesCompleted()) {
-		return "Poor";
-	}
-	else if((iKilled + iCaptured) == 0 && iInjured == 0)
+	if((iKilled + iCaptured) == 0 && iInjured == 0)
 	{
 		return "Flawless";
 	}
@@ -450,95 +470,50 @@ simulated function string BuildUnitMetric(int UnitID, string Metric) {
 	return "UNIT_"$UnitID$"_"$Metric;
 }
 
-// function string GetObjectiveImagePath(obj) {}
-/* Template for how to set image for the expanded view
-function string GetObjectiveImagePath() {
-	local string StrButtonIcon;
-
-	switch(Source)
-	{
-	case 'MissionSource_LandedUFO':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Advent";
-		break;
-	case 'MissionSource_AlienNetwork':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Alien";
-		break;
-	case 'MissionSource_Council':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Council";
-		break;
-	case 'MissionSource_GuerillaOp':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_GOPS";
-		break;
-	case 'MissionSource_Retaliation':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Retaliation";
-		if (GeneratedMission.Mission.MissionName == 'ChosenRetaliation')
-		{
-			StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Retaliation";
-		}
-		break;
-	case 'MissionSource_BlackSite':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Blacksite";
-		break;
-	case 'MissionSource_Forge':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_Forge";
-		break;
-	case 'MissionSource_PsiGate':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_PsiGate";
-		break;
-	case 'MissionSource_Broadcast':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_FinalMission";
-		break;
-	case 'MissionSource_Final':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_AlienFortress";
-		break;
-	case 'MissionSource_SupplyRaid':
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_SupplyRaid";
-		if (GeneratedMission.Mission.MissionName == 'SupplyExtraction')
-		{
-			StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_SupplyExtraction";
-		}
-		break;
-	case 'MissionSource_LostAndAbandoned':
-	case 'MissionSource_ResistanceOp':
-		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_ResOps";
-		break;
-	case 'MissionSource_RescueSoldier':
-		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_RescueSoldier";
-		break;
-	case 'MissionSource_ChosenAmbush':
-		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_EscapeAmbush";
-		break;
-	case 'MissionSource_ChosenStronghold':
-		StrButtonIcon = "img:///UILibrary_XPACK_Common.MissionIcon_ChosenStronghold";
-		break;
-	default:
-		StrButtonIcon = "img:///UILibrary_StrategyImages.X2StrategyMap.MissionIcon_GoldenPath";
-	};
-
-	// Start Issue #537
-	TriggerOverrideMissionSiteIconImage(StrButtonIcon);
-	// End Issue #537
-
-	return StrButtonIcon;
-
+// These objective names can be found in XComGame.int (the localization folder) and search for DisplayName
+function string GetObjectiveImagePath(string obj) {
+	if (obj == "Defeat Chosen Warlock") {
+		return "img:///UILibrary_XPACK_StrategyImages.DarkEvent_Loyalty_Among_Thieves_Warlock";
+	} else if (obj == "Defeat Chosen Assassin") {
+		return "img:///UILibrary_XPACK_StrategyImages.DarkEvent_Loyalty_Among_Thieves_Assasin";
+	} else if (obj == "Defeat Chosen Hunter") {
+		return "img:///UILibrary_XPACK_StrategyImages.DarkEvent_Loyalty_Among_Thieves_Hunter";
+	} else if (obj == "Rescue Stranded Resistance Agents" || InStr(obj, "Gather Survivors") > -1) {
+		return "img:///UILibrary_DLC2Images.Alert_Downed_Skyranger";
+	} else if (obj == "Stop the ADVENT Retaliation" || obj == "Haven Assault") {
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Retaliation";
+	} else if (obj == "Protect the Device") {
+		return "img:///UILibrary_XPACK_StrategyImages.CovertOp_Gain_Resistance_Contact";
+	} else if (obj == "Recover the ADVENT Power Converter") {
+		return "uilibrary_strategyimages.X2StrategyMap.Alert_Sky_Tower"; //
+	} else if (obj == "Secure the Disabled UFO") {
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_UFO_Landed";
+	} else if (obj == "Destroy the Alien Relay") {
+		return "img:///uilibrary_strategyimages.X2StrategyMap.Alert_Flight_Device";
+	} else if (obj == "Defend the Avenger" || obj == "Repel the Chosen Assault") {
+		return "img:///UILibrary_XPACK_StrategyImages.Alert_Avenger_Assault";
+	} else if (obj == "Escape Covert Action") {
+		return "img:///UILibrary_XPACK_StrategyImages.Mission_ChosenAmbush";
+	} else if (InStr(obj, "Raid") > -1 || obj == "Extract ADVENT Supplies") {
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.POI_DeadAdvent";
+	}  else if (InStr(obj, "Hack") > -1) {
+		return "img:///UILibrary_XPACK_StrategyImages.CovertOp_Recover_X_Intel";
+	} else if (InStr(obj, "Extract VIP") > -1 || obj == "Recover Resistance Operative") {
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.DarkEvent_Traitor";
+	} else if (InStr(obj, "Rescue VIP") > -1 || obj == "Rescue Operative from ADVENT Compound") {
+		return "img:///UILibrary_XPACK_StrategyImages.DarkEvent_The_Collectors";
+	} else if(InStr(obj, "Neutralize") > -1) {
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Guerrilla_Ops";
+	} else if (InStr(obj, "Sabotage") > -1) {
+		return "img:///UILibrary_XPACK_StrategyImages.CovertOp_Reduce_Avatar_Project_Progress";
+	} else if (InStr(obj, "Recover Item") > -1 ) {
+		return "img:///UILibrary_XPACK_StrategyImages.CovertOp_Recover_Alien_Loot";
+	} else if (InStr(obj, "Investigate") > -1 || obj == "Secure the ADVENT Network Tower" || obj == "Assault the Alien Fortress" || obj == "Destroy Avatar Project") { // story
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.POI_WhatsInTheBarn";
+	} else { // custom
+		return "img:///UILibrary_StrategyImages.X2StrategyMap.Alert_Objective_Complete";
+	}
 }
-
-simulated function TriggerOverrideMissionSiteIconImage(out string ImagePath)
-{
-	local XComLWTuple Tuple;
-
-	Tuple = new class'XComLWTuple';
-	Tuple.Id = 'OverrideMissionSiteIconImage';
-	Tuple.Data.Add(1);
-	Tuple.Data[0].Kind = XComLWTVString;
-	Tuple.Data[0].s = ImagePath;
-
-	`XEVENTMGR.TriggerEvent('OverrideMissionSiteIconImage', Tuple, self);
-
-	ImagePath = Tuple.Data[0].s;
-}
-*/
-
 
 
 DefaultProperties {
