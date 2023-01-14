@@ -1,15 +1,9 @@
 // This is an Unreal Script
 
-// This is an Unreal Script
 class MissionHistory_ListItem extends UITLEChallenge_ListItem dependson(XComGameState_MissionHistoryLogs);
 
 var MissionHistoryLogsDetails Datum;
-/*
-simulated function Refresh(MissionHistoryLogsDetails UpdateData) {
-	Datum = UpdateData;
-	PopulateData();
-}
-*/
+
 
 simulated function RefreshHistory(MissionHistoryLogsDetails UpdateData) {
 	Datum = UpdateData;
@@ -27,18 +21,3 @@ simulated function FillTable() {
 	
 	MC.EndOp();
 }
-// For reference
-/*
-simulated function PopulateData()
-{
-	MC.BeginFunctionOp("UpdateData");
-	
-	MC.QueueString(Data.MissionName);		// Mission
-	MC.QueueString(Data.MissionObjective);	// Objective
-	MC.QueueString(Data.MapName);			// Map
-	MC.QueueString(Data.Squad);				// Squad
-	MC.QueueString(Data.Enemies);			// Enemies
-	
-	MC.EndOp();
-}
-*/
