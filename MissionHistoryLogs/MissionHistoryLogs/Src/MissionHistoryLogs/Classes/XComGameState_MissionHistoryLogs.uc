@@ -353,6 +353,8 @@ function int GetNumEnemiesDeployed(XComGameState_BattleData BattleData) {
 		class'CHHelpers'.static.GetTeamTwoPlayer().GetOriginalUnits(arrUnits);
 	}
 	iTotal = arrUnits.Length;
+	`log("what is thte total enemies units deployed?");
+	`log(iTotal);
 	// add in any aliens from the transfer state
 	if(BattleData.DirectTransferInfo.IsDirectMissionTransfer)
 	{
