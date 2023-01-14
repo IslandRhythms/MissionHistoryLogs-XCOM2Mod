@@ -101,11 +101,11 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	StrDetails = StrDetails $ "\nWith a force level of"@Data.ForceLevel;
 	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
 	if (Data.VIP != "") StrDetails = StrDetails $ "\nVIP Rescued:"@Data.VIP;
-	if (Data.SoldierVIPOne != "" && Data.SoldierVIPTwo != "") {StrDetails $ "\nAgents Rescued:" @Data.SoldierVIPOne@Data.SoldierVIPTwo;}
-	else if (Data.SoldierVIPOne != "") {StrDetails $ "\nAgent Rescued:"@Data.SoldierVIPOne;}
-	else if (Data.SoldierVIPTwo != "") {StrDetails $ "\nAgent Rescued:"@Data.SoldierVIPTwo;}
+	if (Data.SoldierVIPOne != "" && Data.SoldierVIPTwo != "") { StrDetails = StrDetails $ "\nAgents Rescued:" @Data.SoldierVIPOne@Data.SoldierVIPTwo;}
+	else if (Data.SoldierVIPOne != "") {StrDetails = StrDetails $ "\nAgent Rescued:"@Data.SoldierVIPOne;}
+	else if (Data.SoldierVIPTwo != "") {StrDetails = StrDetails $ "\nAgent Rescued:"@Data.SoldierVIPTwo;}
 	DialogData.strText = StrDetails;
-	DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(PathName(Data.ObjectiveImagePath));
+	DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(Data.ObjectiveImagePath);
 
 	Movie.Pres.UIRaiseDialog( DialogData );
 

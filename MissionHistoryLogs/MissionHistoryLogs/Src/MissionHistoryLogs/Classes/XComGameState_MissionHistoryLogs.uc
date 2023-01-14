@@ -145,16 +145,16 @@ function UpdateTableData() {
 	if (MissionDetails.IsVIPMission()) {
 	// need to check if everyone was rescued before assigning.
 		Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[0].ObjectID));
-		ItemData.VIP = Unit.FirstName $ " " $ Unit.LastName;
+		ItemData.VIP = Unit.GetFullName();
 		// Soldier A and Soldier B
 		if (BattleData.RewardUnits.Length > 2) {
 			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[1].ObjectID));
-			ItemData.SoldierVIPOne = Unit.FirstName $ " " $ Unit.NickName $ " " $ Unit.LastName;
+			ItemData.SoldierVIPOne = Unit.GetFullName();
 			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[2].ObjectID));
-			ItemData.SoldierVIPTwo = Unit.FirstName $ " " $ Unit.NickName $ " " $ Unit.LastName;
+			ItemData.SoldierVIPTwo = Unit.GetFullName();
 		} else if (BattleData.RewardUnits.Length > 1) { // Only Soldier A
 			Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[1].ObjectID));
-			ItemData.SoldierVIPOne = Unit.FirstName $ " " $ Unit.NickName $ " " $ Unit.LastName;
+			ItemData.SoldierVIPOne = Unit.GetFullName();
 		}
 	}
 	// we need to keep track of this because any variable that could help us do this is only valid in the tactical layer.
