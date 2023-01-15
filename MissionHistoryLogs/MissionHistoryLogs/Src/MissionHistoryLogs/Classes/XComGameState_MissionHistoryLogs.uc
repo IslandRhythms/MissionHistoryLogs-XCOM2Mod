@@ -338,8 +338,28 @@ function int GetNumEnemiesKilled(XComGameState_BattleData BattleData) {
 function int GetNumEnemiesDeployed(XComGameState_BattleData BattleData) {
 	local array<XComGameState_Unit> arrUnits;
 	local XGAIPlayer_TheLost LostPlayer;
-	local int iTotal;
+	local int iTotal, i;
+	local XGPlayer localPlayer, otherPlayer;
+	local XGBattle battle;
 
+	battle = `BATTLE;
+
+	localPlayer = battle.GetLocalPlayer();
+	for (i = 0; i < battle.m_iNumPlayers; i++) {
+		otherPlayer = battle.m_arrPlayers[i];
+		if (!localPlayer.IsEnemy(otherPlayer)) {
+			continue;
+		}
+		arrUnits.Length = 0;
+		otherPlayer.GetOriginalUnits(arrUnits, true); // boolean flag to determine whether to skip the counting of turrets as enemies
+		if (otherPlayer.m_ETeam == 32) { // 32 is the value for the lost determined by the game devs. Ask them, not me.
+			// this will be used for calculating killed units, not total
+		}
+		iTotal += arrUnits.Length;
+	}
+	`log("what is iTotal"@iTotal);
+	return iTotal;
+	/*
 	BATTLE().GetAIPlayer().GetOriginalUnits(arrUnits);
 	LostPlayer = BATTLE().GetTheLostPlayer();
 	if (LostPlayer != none) { LostPlayer.GetOriginalUnits(arrUnits); }
@@ -361,7 +381,7 @@ function int GetNumEnemiesDeployed(XComGameState_BattleData BattleData) {
 		iTotal += BattleData.DirectTransferInfo.AliensSeen;
 	}
 
-	return iTotal;
+	return iTotal;*/
 }
 
 function XGBattle_SP BATTLE() {
