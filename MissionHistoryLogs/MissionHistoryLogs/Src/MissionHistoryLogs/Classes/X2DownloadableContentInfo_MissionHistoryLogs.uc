@@ -27,7 +27,6 @@ static event InstallNewCampaign(XComGameState StartState)
 static event OnPostMission()
 {
     local XComGameState_MissionHistoryLogs Log;
-    local XComGameStateContext_ChangeContainer Container;
     local XComGameState NewGameState;
     local XComGameStateHistory History;
 

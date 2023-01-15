@@ -84,7 +84,8 @@ function UpdateTableData() {
 	local XComGameState_ResistanceFaction Faction;
 	local XComGameState_AdventChosen ChosenState;
 	local ChosenInformation MiniBoss;
-	local int Index;
+	local int Index, NumEnemiesDeployed, NumEnemiesKilled;
+	local array<X2CharacterTemplate> TemplatesToSpawn;
 	local string ChosenName;
 	local XComGameState_LWSquadManager SquadMgr;
 	local XComGameState_LWPersistentSquad Squad;
@@ -114,6 +115,10 @@ function UpdateTableData() {
 	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
+	MissionDetails.GetShadowChamberMissionInfo(NumEnemiesDeployed, TemplatesToSpawn);
+	GetTotalEnemiesKilled(NumEnemiesKilled);
+	ItemData.NumEnemiesDeployed = NumEnemiesDeployed + TemplatesToSpawn.Length;
+	ItemData.NumEnemiesKilled = NumEnemiesKilled;
 	// This will get the correct squad on a mission
 	if(IsModActive('SquadManager')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
@@ -201,8 +206,6 @@ function UpdateTableData() {
 		`log("Some weird case we didn't cover");
 		ItemData.Enemies = "Advent";
 	}
-	ItemData.NumEnemiesKilled = GetNumEnemiesKilled(BattleData);
-	ItemData.NumEnemiesDeployed = GetNumEnemiesDeployed(BattleData);
 	ItemData.ForceLevel = BattleData.GetForceLevel();
 	MissionTemplate = MissionTemplateManager.FindMissionTemplate(BattleData.MapData.ActiveMission.MissionName);
 	ParcelManager = `PARCELMGR;
@@ -301,104 +304,20 @@ function bool IsModActive(name ModName)
     return false;
 }
 
-function int GetNumEnemiesKilled(XComGameState_BattleData BattleData) {
-	local array<XComGameState_Unit> arrUnits;
-	local XGAIPlayer_TheLost LostPlayer;
-	local int iKilled;
-	local int i;
-
-	BATTLE().GetAIPlayer().GetOriginalUnits(arrUnits);
-	LostPlayer = BATTLE().GetTheLostPlayer();
-	if (LostPlayer != none) { LostPlayer.GetOriginalUnits(arrUnits); }
-	if(class'CHHelpers'.static.TeamOneRequired()) // issue #188 - account for added enemy teams
-	{
-		class'CHHelpers'.static.GetTeamOnePlayer().GetOriginalUnits(arrUnits);
-	}
-		
-	if(class'CHHelpers'.static.TeamTwoRequired()) // issue #188 - account for added enemy teams
-	{
-		class'CHHelpers'.static.GetTeamTwoPlayer().GetOriginalUnits(arrUnits);
-	}
-	for(i = 0; i < arrUnits.Length; i++)
-	{
-		if(arrUnits[i].IsDead())
-		{
-			iKilled++;
-		}
-	}
-
-	// add in any aliens from the transfer state
-	if(BattleData.DirectTransferInfo.IsDirectMissionTransfer)
-	{
-		iKilled += BattleData.DirectTransferInfo.AliensKilled;
-	}
-	return iKilled;
-}
-
-function int GetNumEnemiesDeployed(XComGameState_BattleData BattleData) {
-	local array<XComGameState_Unit> arrUnits;
-	local XGAIPlayer_TheLost LostPlayer;
-	local int iTotal, i;
-	local XGPlayer localPlayer, otherPlayer;
-	local XGBattle battle;
-
-	battle = `BATTLE;
-
-	localPlayer = battle.GetLocalPlayer();
-	for (i = 0; i < battle.m_iNumPlayers; i++) {
-		otherPlayer = battle.m_arrPlayers[i];
-		if (!localPlayer.IsEnemy(otherPlayer)) {
-			continue;
-		}
-		arrUnits.Length = 0;
-		otherPlayer.GetOriginalUnits(arrUnits, true); // boolean flag to determine whether to skip the counting of turrets as enemies
-		if (otherPlayer.m_ETeam == 32) { // 32 is the value for the lost determined by the game devs. Ask them, not me.
-			// this will be used for calculating killed units, not total
-		}
-		iTotal += arrUnits.Length;
-	}
-	`log("what is iTotal"@iTotal);
-	return iTotal;
-	/*
-	BATTLE().GetAIPlayer().GetOriginalUnits(arrUnits);
-	LostPlayer = BATTLE().GetTheLostPlayer();
-	if (LostPlayer != none) { LostPlayer.GetOriginalUnits(arrUnits); }
-	if(class'CHHelpers'.static.TeamOneRequired()) // issue #188 - account for added enemy teams
-	{
-		class'CHHelpers'.static.GetTeamOnePlayer().GetOriginalUnits(arrUnits);
-	}
-		
-	if(class'CHHelpers'.static.TeamTwoRequired()) // issue #188 - account for added enemy teams
-	{
-		class'CHHelpers'.static.GetTeamTwoPlayer().GetOriginalUnits(arrUnits);
-	}
-	iTotal = arrUnits.Length;
-	`log("what is thte total enemies units deployed?");
-	`log(iTotal);
-	// add in any aliens from the transfer state
-	if(BattleData.DirectTransferInfo.IsDirectMissionTransfer)
-	{
-		iTotal += BattleData.DirectTransferInfo.AliensSeen;
-	}
-
-	return iTotal;*/
-}
-
-function XGBattle_SP BATTLE() {
-	return XGBattle_SP(`BATTLE);
-}
-
-
 function string GetMissionRating(int injured, int captured, int killed, int total)
 {
 	local int iKilled, iInjured, iPercentageKilled, iCaptured;
 	local XComGameState_BattleData BattleData;
 
 	BattleData = XComGameState_BattleData(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
+	if (!BattleData.bLocalPlayerWon) {
+		return "Poor";
+	}
 	iKilled = killed;
 	iCaptured = captured;
 	iPercentageKilled = ((iKilled + iCaptured) * 100) / total;
 	iInjured = injured;
+	
 	if((iKilled + iCaptured) == 0 && iInjured == 0)
 	{
 		return "Flawless";
@@ -418,6 +337,17 @@ function string GetMissionRating(int injured, int captured, int killed, int tota
 	else
 	{
 		return "Poor";
+	}
+}
+
+function GetTotalEnemiesKilled(out int NumEnemiesKilled) {
+	local StateObjectReference UnitRef;
+	local XComGameState_Analytics Analytics;
+	local float kills;
+	Analytics = XComGameState_Analytics(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_Analytics'));
+	foreach `XCOMHQ.Squad(UnitRef) {
+		kills = Analytics.GetTacticalFloatValue(BuildUnitMetric(UnitRef.ObjectID, "ACC_UNIT_KILLS"));
+		NumEnemiesKilled += kills;
 	}
 }
 /*

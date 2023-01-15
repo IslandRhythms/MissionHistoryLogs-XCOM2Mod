@@ -63,7 +63,6 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	local TDialogueBoxData DialogData;
 	local MissionHistoryLogsDetails Data;
 	local String StrDetails;
-	local Texture2D StaffPicture;
 
 	Data = MissionHistory_ListItem(ContainerList.GetItem(ListItemIndex)).Datum;
 	DialogData.eType = eDialog_Normal;
