@@ -225,13 +225,19 @@ function UpdateTableData() {
 	ItemData.EntryIndex = TableData.Length + 1;
 	ItemData.Date = class 'X2StrategyGameRulesetDataStructures'.static.GetDateString(BattleData.LocalTime, true);
 	ItemData.MissionName = BattleData.m_strOpName;
+	ItemData.NumEnemiesDeployed = NumEnemiesDeployed; // + TemplatesToSpawn.Length; // what is TemplatesToSpawn suppose to be? Reinforcements? Civilians? both?
+	ItemData.NumEnemiesKilled = NumEnemiesKilled;
 	// Gatecrasher's objective is the same as the op name and thats lame.
 	if (BattleData.m_strOpName == "Operation Gatecrasher") {
 		ItemData.MissionObjective = "Send a Message";
 		ItemData.ObjectiveImagePath = "uilibrary_strategyimages.X2StrategyMap.Alert_Resistance_Ops_Appear";
+		ItemData.NumEnemiesDeployed = ItemData.NumEnemiesKilled;
 	} else {
 		ItemData.MissionObjective = MissionTemplate.DisplayName;
 		ItemData.ObjectiveImagePath = GetObjectiveImagePath(MissionTemplate.DisplayName);
+		if (ItemData.NumEnemiesKilled > ItemData.NumEnemiesDeployed) {
+			ItemData.NumEnemiesDeployed = ItemData.NumEnemiesKilled;
+		}
 	}
 	ItemData.MissionLocation = BattleData.m_strLocation;
 	ItemData.MissionRating = rating;
@@ -241,7 +247,7 @@ function UpdateTableData() {
 	ItemData.NumSoldiersInjured = injured;
 	ItemData.SoldierMVP = CalculateMissionMVP();
 	if (TableData.Length > 1) {
-		TableData.Sort(sortByWins);
+		TableData.Sort(sortByEntryIndex);
 	}
 	for (Index = 0; Index < TableData.Length; Index++) {
 		`log("Is the array sorted?"@TableData[Index].Wins);
@@ -275,7 +281,11 @@ function UpdateTableData() {
 function int sortByWins(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {
 	return sortNumerically(A.Wins, B.Wins);
 }
-// we want the entry with the greatest numbner of wins to be the last entry.
+
+function int sortByEntryIndex(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {
+	return sortNumerically(A.EntryIndex, B.EntryIndex);
+}
+// we want the entry with the greatest number to be the last entry.
 function int sortNumerically(float A, float B) {
 	if (A < B) {
 		return 1;
