@@ -228,6 +228,7 @@ function UpdateTableData() {
 	ItemData.NumEnemiesDeployed = NumEnemiesDeployed; // + TemplatesToSpawn.Length; // what is TemplatesToSpawn suppose to be? Reinforcements? Civilians? both?
 	ItemData.NumEnemiesKilled = NumEnemiesKilled;
 	// Gatecrasher's objective is the same as the op name and thats lame.
+	// Gatecrasher seems to be a special case
 	if (BattleData.m_strOpName == "Operation Gatecrasher") {
 		ItemData.MissionObjective = "Send a Message";
 		ItemData.ObjectiveImagePath = "uilibrary_strategyimages.X2StrategyMap.Alert_Resistance_Ops_Appear";
@@ -235,9 +236,6 @@ function UpdateTableData() {
 	} else {
 		ItemData.MissionObjective = MissionTemplate.DisplayName;
 		ItemData.ObjectiveImagePath = GetObjectiveImagePath(MissionTemplate.DisplayName);
-		if (ItemData.NumEnemiesKilled > ItemData.NumEnemiesDeployed) {
-			ItemData.NumEnemiesDeployed = ItemData.NumEnemiesKilled;
-		}
 	}
 	ItemData.MissionLocation = BattleData.m_strLocation;
 	ItemData.MissionRating = rating;
