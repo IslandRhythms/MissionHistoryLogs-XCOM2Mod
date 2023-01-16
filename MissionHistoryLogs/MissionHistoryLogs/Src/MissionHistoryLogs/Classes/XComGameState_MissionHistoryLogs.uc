@@ -162,50 +162,53 @@ function UpdateTableData() {
 			ItemData.SoldierVIPOne = Unit.GetFullName();
 		}
 	}
-	// we need to keep track of this because any variable that could help us do this is only valid in the tactical layer.
+	// we need to keep track of when the chosen is encountered because any variable that could help us do this is only valid in the tactical layer.
 	// for some reason when it gets to strategy, any variable that could help us determine if the chosen was on the most recent mission gets wiped.
-	if (ChosenState.FirstName == "") {
+	`log("This is how we'll know if the chosen was on the mission hopefully"@BattleData.ChosenRef.ObjectID);
+	if (BattleData.ChosenRef.ObjectID == 0) {
 		ItemData.Enemies = "Advent";
-	}
-	else if (ChosenState.NumEncounters == 1) {
-		`log("our first encounter with this chosen");
-		MiniBoss.ChosenType = string(ChosenState.GetMyTemplateName());
-		MiniBoss.ChosenType = Split(MiniBoss.ChosenType, "_", true);
-		MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-		MiniBoss.NumEncounters = 1;
-		MiniBoss.CampaignIndex = CampaignIndex;
-		if (BattleData.bChosenLost) {
-			MiniBoss.NumDefeats += 1;
-		}
-		TheChosen.AddItem(MiniBoss);
-		ItemData.ChosenName = MiniBoss.ChosenName;
-		ItemData.Enemies = MiniBoss.ChosenType;
-		ItemData.NumChosenEncounters = ChosenState.NumEncounters;
-		ItemData.WinPercentageAgainstChosen = float(MiniBoss.NumDefeats / MiniBoss.NumEncounters);
-		`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
-	} else if (ChosenState.NumEncounters > 1) {
-		`log("we've encountered them before");
-		for (Index = 0; Index < TheChosen.Length; Index++) {
-			ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-			if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
-				TheChosen[Index].NumEncounters = ChosenState.NumEncounters;
-				if(BattleData.bChosenLost) {
-					`log("the chosen was defeated this mission");
-					TheChosen[Index].NumDefeats += 1;
+	} else {
+		ChosenState = XComGameState_AdventChosen(`XCOMHISTORY.GetGameStateForObjectID(BattleData.ChosenRef.ObjectID));
+		ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
+		// if we are checking that they weren't on the last mission, then this number should increase correctly.
+		if (ChosenState.NumEncounters == 1) {
+			`log("our first encounter with this chosen");
+			MiniBoss.ChosenType = string(ChosenState.GetMyTemplateName());
+			MiniBoss.ChosenType = Split(MiniBoss.ChosenType, "_", true);
+			MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
+			MiniBoss.NumEncounters = 1;
+			MiniBoss.CampaignIndex = CampaignIndex;
+			if (BattleData.bChosenLost) {
+				MiniBoss.NumDefeats += 1;
+			}
+			TheChosen.AddItem(MiniBoss);
+			ItemData.ChosenName = MiniBoss.ChosenName;
+			ItemData.Enemies = MiniBoss.ChosenType;
+			ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+			ItemData.WinPercentageAgainstChosen = float(MiniBoss.NumDefeats / MiniBoss.NumEncounters);
+			`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
+		} else {
+			`log("we've encountered them before");
+			for (Index = 0; Index < TheChosen.Length; Index++) {
+				ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
+				if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
+					TheChosen[Index].NumEncounters = ChosenState.NumEncounters;
+					if(BattleData.bChosenLost) {
+						`log("the chosen was defeated this mission");
+						TheChosen[Index].NumDefeats += 1;
+					}
+					ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
+					ItemData.Enemies = TheChosen[Index].ChosenType;
+					ItemData.NumChosenEncounters = TheChosen[Index].NumEncounters;
+					`log("what is the number of encounters"@ChosenState.NumEncounters);
+					`log("what is the number of defeats"@ChosenState.NumDefeats);
+					ItemData.WinPercentageAgainstChosen = float(TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters);
+					break;
 				}
-				ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-				ItemData.Enemies = TheChosen[Index].ChosenType;
-				ItemData.NumChosenEncounters = ChosenState.NumEncounters;
-				`log("what is the number of encounters"@ChosenState.NumEncounters);
-				`log("what is the number of defeats"@ChosenState.NumDefeats);
-				ItemData.WinPercentageAgainstChosen = float(TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters);
-				break;
 			}
 		}
-	} else {
-		`log("Some weird case we didn't cover");
-		ItemData.Enemies = "Advent";
 	}
+
 	ItemData.ForceLevel = BattleData.GetForceLevel();
 	MissionTemplate = MissionTemplateManager.FindMissionTemplate(BattleData.MapData.ActiveMission.MissionName);
 	ParcelManager = `PARCELMGR;
