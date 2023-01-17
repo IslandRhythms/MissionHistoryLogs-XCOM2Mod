@@ -36,9 +36,6 @@
     <Content Include="Src\MissionHistoryLogs\Classes\MissionHistoryScreen.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\MissionHistoryLogs\Classes\MissionHistoryScreenManager.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\MissionHistoryLogs\Classes\MissionHistory_ListItem.uc">
       <SubType>Content</SubType>
     </Content>
@@ -46,6 +43,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\MissionHistoryLogs\Classes\X2DownloadableContentInfo_MissionHistoryLogs.uc" />
+    <Content Include="Src\MissionHistoryLogs\Classes\XComGameState_MissionHistoryLogs.uc">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildLocalExtensionPath)\XCOM2.targets" />
 </Project>
