@@ -115,10 +115,9 @@ function UpdateTableData() {
 	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
+	// we call this function because it can get us the initial enemies that are spawned on the map. It won't tell us if reinforcements are coming.
 	MissionDetails.GetShadowChamberMissionInfo(NumEnemiesDeployed, TemplatesToSpawn);
 	GetTotalEnemiesKilled(NumEnemiesKilled);
-	ItemData.NumEnemiesDeployed = NumEnemiesDeployed + TemplatesToSpawn.Length;
-	ItemData.NumEnemiesKilled = NumEnemiesKilled;
 	// This will get the correct squad on a mission
 	if(IsModActive('SquadManager')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
@@ -243,7 +242,7 @@ function UpdateTableData() {
 	if (BattleData.m_strOpName == "Operation Gatecrasher") {
 		ItemData.MissionObjective = "Send a Message";
 		ItemData.ObjectiveImagePath = "uilibrary_strategyimages.X2StrategyMap.Alert_Resistance_Ops_Appear";
-		ItemData.NumEnemiesDeployed = ItemData.NumEnemiesKilled;
+		ItemData.NumEnemiesDeployed = ItemData.NumEnemiesKilled; // This is the only time we can guarantee that XCOM killed every enemy unit.
 	} else {
 		ItemData.MissionObjective = MissionTemplate.DisplayName;
 		ItemData.ObjectiveImagePath = GetObjectiveImagePath(MissionTemplate.DisplayName);
@@ -359,6 +358,15 @@ function string GetMissionRating(int injured, int captured, int killed, int tota
 	}
 }
 
+/*
+* The reason this function exists is that for some reason, once we've exited the tactical layer,
+* any data that we would need to get an accurate number is wiped.
+* As a result, the only way to get a somewhat accurate number is the below function.
+* The function gets the Unit's kill stat for the mission and we simply add them all together.
+* The flaw of this function is that it does not count cases where XCOM did not directly kill the enemy unit.
+* For example: If XCOM throws a grenade at an enemy that does not kill them, but the floor collapses and they die from the fall damage,
+* no unit is credited with the kill.
+*/
 function GetTotalEnemiesKilled(out int NumEnemiesKilled) {
 	local StateObjectReference UnitRef;
 	local XComGameState_Analytics Analytics;

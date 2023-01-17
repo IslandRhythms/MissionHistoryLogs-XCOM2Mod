@@ -82,7 +82,7 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 		StrDetails = StrDetails $ "\nAgainst:" @ Data.Enemies;
 	}
 	StrDetails = StrDetails $ "\nEnemies on site:"@Data.NumEnemiesDeployed;
-	StrDetails = StrDetails $ "\nXCOM Wiped:"@Data.NumEnemiesKilled@" Enemies";
+	StrDetails = StrDetails $ "\nXCOM engaged and directly killed:"@Data.NumEnemiesKilled@" Enemies";
 	StrDetails = StrDetails $ "\nWith a force level of"@Data.ForceLevel;
 	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
 	if (Data.VIP == "" && Data.SoldierVIPOne == "" && Data.SoldierVIPTwo == "") {
