@@ -3,15 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # XCOM ModBuddy Solution File, Format Version 11.00
 VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{5DAE07AF-E217-45C1-8DE7-FF99D6011E8A}") = "MissionHistoryLogs", "MissionHistoryLogs\MissionHistoryLogs.x2proj", "{CFD43E99-93E8-47E5-B437-3A411F7519FD}"
+Project("{5DAE07AF-E217-45C1-8DE7-FF99D6011E8A}") = "MissionHistoryLogs", "MissionHistoryLogs\MissionHistoryLogs.x2proj", "{ED7B453B-7727-4ADE-AD0A-F9B4378B56F1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Default|XCOM 2 = Default|XCOM 2
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CFD43E99-93E8-47E5-B437-3A411F7519FD}.Default|XCOM 2.ActiveCfg = Default|XCOM 2
-		{CFD43E99-93E8-47E5-B437-3A411F7519FD}.Default|XCOM 2.Build.0 = Default|XCOM 2
+		{ED7B453B-7727-4ADE-AD0A-F9B4378B56F1}.Default|XCOM 2.ActiveCfg = Default|XCOM 2
+		{ED7B453B-7727-4ADE-AD0A-F9B4378B56F1}.Default|XCOM 2.Build.0 = Default|XCOM 2
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
