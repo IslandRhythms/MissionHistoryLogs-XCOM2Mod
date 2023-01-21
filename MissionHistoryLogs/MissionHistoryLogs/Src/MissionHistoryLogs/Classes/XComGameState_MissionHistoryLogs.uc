@@ -225,7 +225,6 @@ function UpdateTableData() {
 	if (BattleData.m_strOpName == "Operation Gatecrasher") {
 		ItemData.MissionObjective = "Send a Message";
 		ItemData.ObjectiveImagePath = "uilibrary_strategyimages.X2StrategyMap.Alert_Resistance_Ops_Appear";
-		ItemData.NumEnemiesDeployed = ItemData.NumEnemiesKilled; // This is the only time we can guarantee that XCOM killed every enemy unit.
 	} else {
 		ItemData.MissionObjective = MissionTemplate.DisplayName;
 		ItemData.ObjectiveImagePath = GetObjectiveImagePath(MissionTemplate.DisplayName);
