@@ -174,10 +174,12 @@ function UpdateTableData() {
 			if (BattleData.bChosenLost) {
 				MiniBoss.NumDefeats += 1;
 			}
+			`log("what is the number of of times xcom has defeated this chosen?"@MiniBoss.NumDefeats);
 			TheChosen.AddItem(MiniBoss);
 			ItemData.ChosenName = MiniBoss.ChosenName;
 			ItemData.Enemies = MiniBoss.ChosenType;
 			ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+			`log("what is the number of encounters?"@ChosenState.NumEncounters);
 			ItemData.WinPercentageAgainstChosen = float(MiniBoss.NumDefeats / MiniBoss.NumEncounters);
 			`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 		} else {
