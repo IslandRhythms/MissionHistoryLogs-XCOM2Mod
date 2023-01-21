@@ -16,7 +16,7 @@ struct MissionHistoryLogsDetails {
 	var int NumSoldiersMIA;
 	var int NumSoldiersInjured;
 	var int ForceLevel;
-	var int NumChosenEncounters;
+	var float NumChosenEncounters;
 	var float WinPercentageAgainstChosen;
 	var float Wins;
 	var string SuccessRate;
@@ -33,17 +33,17 @@ struct MissionHistoryLogsDetails {
 	var string QuestGiver; // Reapers, Skirmishers, Templars, The Council
 	var string MissionRating; // Poor, Good, Fair, Excellent, Flawless.
 	var string MissionLocation; // city and country of the mission
-	var bool bIsVIPMission;
 	var string VIP;
 	var string SoldierVIPOne;
 	var string SoldierVIPTwo;
+	var bool bIsVIPMission;
 };
 
 struct ChosenInformation {
 	var string ChosenType;
 	var string ChosenName;
-	var int NumEncounters; // XComGameState_AdventChosen.NumEncounters
-	var int NumDefeats; // How many times has XCOM defeated this chosen
+	var float NumEncounters; // XComGameState_AdventChosen.NumEncounters
+	var float NumDefeats; // How many times has XCOM defeated this chosen
 	var int CampaignIndex;
 };
 
@@ -169,16 +169,16 @@ function UpdateTableData() {
 			MiniBoss.ChosenType = string(ChosenState.GetMyTemplateName());
 			MiniBoss.ChosenType = Split(MiniBoss.ChosenType, "_", true);
 			MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-			MiniBoss.NumEncounters = 1;
+			MiniBoss.NumEncounters = 1.0;
 			MiniBoss.CampaignIndex = CampaignIndex;
 			if (BattleData.bChosenLost) {
-				MiniBoss.NumDefeats += 1;
+				MiniBoss.NumDefeats += 1.0;
 			}
 			`log("what is the number of of times xcom has defeated this chosen?"@MiniBoss.NumDefeats);
 			TheChosen.AddItem(MiniBoss);
 			ItemData.ChosenName = MiniBoss.ChosenName;
 			ItemData.Enemies = MiniBoss.ChosenType;
-			ItemData.NumChosenEncounters = ChosenState.NumEncounters;
+			ItemData.NumChosenEncounters = float(ChosenState.NumEncounters);
 			`log("what is the number of encounters?"@ChosenState.NumEncounters);
 			ItemData.WinPercentageAgainstChosen = float(MiniBoss.NumDefeats / MiniBoss.NumEncounters);
 			`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
@@ -187,10 +187,10 @@ function UpdateTableData() {
 			for (Index = 0; Index < TheChosen.Length; Index++) {
 				ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 				if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
-					TheChosen[Index].NumEncounters = ChosenState.NumEncounters;
+					TheChosen[Index].NumEncounters = float(ChosenState.NumEncounters);
 					if(BattleData.bChosenLost) {
 						`log("the chosen was defeated this mission");
-						TheChosen[Index].NumDefeats += 1;
+						TheChosen[Index].NumDefeats += 1.0;
 					}
 					ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 					ItemData.Enemies = TheChosen[Index].ChosenType;
