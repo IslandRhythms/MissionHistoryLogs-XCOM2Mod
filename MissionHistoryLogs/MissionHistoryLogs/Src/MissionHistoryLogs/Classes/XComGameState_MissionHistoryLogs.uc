@@ -15,9 +15,7 @@ struct MissionHistoryLogsDetails {
 	var int NumSoldiersKilled; 
 	var int NumSoldiersMIA;
 	var int NumSoldiersInjured;
-	var int ForceLevel; // in BattleData: function int GetForceLevel();
-	var int NumEnemiesDeployed;
-	var int NumEnemiesKilled;
+	var int ForceLevel;
 	var int NumChosenEncounters;
 	var float WinPercentageAgainstChosen;
 	var float Wins;
@@ -28,15 +26,14 @@ struct MissionHistoryLogsDetails {
 	var string MapName;
 	var string MapImagePath;
 	var string ObjectiveImagePath;
-	// XComGameState_Analytics will have the information we need to determine the MVP
 	var string SoldierMVP; // Calculated by function
 	var string SquadName;
-	var string SoldiersDeployed; // The Soldiers that make up the squad, currently unused.
 	var string Enemies;
 	var string ChosenName;
 	var string QuestGiver; // Reapers, Skirmishers, Templars, The Council
 	var string MissionRating; // Poor, Good, Fair, Excellent, Flawless.
 	var string MissionLocation; // city and country of the mission
+	var bool bIsVIPMission;
 	var string VIP;
 	var string SoldierVIPOne;
 	var string SoldierVIPTwo;
@@ -66,14 +63,13 @@ var array<SquadInformation> SquadData;
 
 
 function UpdateTableData() {
-	local int injured, captured, killed, total;
+	local int injured, captured, killed, total, Index, CampaignIndex, MapIndex;
 	local StateObjectReference UnitRef;
 	local XComGameState_Unit Unit;
-	local string rating;
+	local string rating, ChosenName;
 	local XComGameState_BattleData BattleData;
 	local XComGameState_CampaignSettings CampaignSettingsStateObject;
 	local XComGameState_HeadquartersAlien AlienHQ;
-	local int CampaignIndex, MapIndex;
 	local MissionHistoryLogsDetails ItemData;
 	local X2MissionTemplateManager MissionTemplateManager;
 	local X2MissionTemplate MissionTemplate;
@@ -84,9 +80,6 @@ function UpdateTableData() {
 	local XComGameState_ResistanceFaction Faction;
 	local XComGameState_AdventChosen ChosenState;
 	local ChosenInformation MiniBoss;
-	local int Index, NumEnemiesDeployed, NumEnemiesKilled;
-	local array<X2CharacterTemplate> TemplatesToSpawn;
-	local string ChosenName;
 	local XComGameState_LWSquadManager SquadMgr;
 	local XComGameState_LWPersistentSquad Squad;
 
@@ -115,9 +108,6 @@ function UpdateTableData() {
 	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
-	// we call this function because it can get us the initial enemies that are spawned on the map. It won't tell us if reinforcements are coming.
-	MissionDetails.GetShadowChamberMissionInfo(NumEnemiesDeployed, TemplatesToSpawn);
-	GetTotalEnemiesKilled(NumEnemiesKilled);
 	// This will get the correct squad on a mission
 	if(IsModActive('SquadManager')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
@@ -136,17 +126,13 @@ function UpdateTableData() {
 		ItemData.SquadName = "XCOM";
 	}
 	AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien', true));
-	`log("AlienHQ retrieved");
 	Faction = XComGameState_ResistanceFaction(`XCOMHISTORY.GetGameStateForObjectID(MissionDetails.ResistanceFaction.ObjectID));
-	`log("Faction Retrieved");
 	ChosenState = XComGameState_AdventChosen(`XCOMHISTORY.GetGameStateForObjectID(AlienHQ.LastAttackingChosen.ObjectID));
-	`log("Chosen retrieved");
 	MissionTemplateManager = class'X2MissionTemplateManager'.static.GetMissionTemplateManager();
-	`log("Mission Template Manager Retrieved");
 	History = class'XComGameStateHistory'.static.GetGameStateHistory();
-	`log("History Retrieved");
 	BattleData = XComGameState_BattleData(History.GetSingleGameStateObjectForClass(class'XComGameState_BattleData'));
-	if (MissionDetails.IsVIPMission()) {
+	ItemData.bIsVIPMission = MissionDetails.IsVIPMission();
+	if (ItemData.bIsVIPMission) {
 	// need to check if everyone was rescued before assigning.
 		Unit = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(BattleData.RewardUnits[0].ObjectID));
 		if (!Unit.IsDead()) {
@@ -230,7 +216,6 @@ function UpdateTableData() {
 			continue;
 		}
 	}
-	`log("got the parcel manager and map name and map image");
 	ItemData.CampaignIndex = CampaignIndex;
 	ItemData.EntryIndex = TableData.Length + 1;
 	ItemData.Date = class 'X2StrategyGameRulesetDataStructures'.static.GetDateString(BattleData.LocalTime, true);
@@ -257,33 +242,19 @@ function UpdateTableData() {
 	if (TableData.Length > 1) {
 		TableData.Sort(sortByEntryIndex);
 	}
-	for (Index = 0; Index < TableData.Length; Index++) {
-		`log("Is the array sorted?"@TableData[Index].Wins);
-	}
-	// win
 	if (BattleData.bLocalPlayerWon) {
-		`log("its a win");
 		ItemData.Wins = TableData[TableData.Length - 1].Wins + 1.0;
-		`log("number of wins is"@ItemData.Wins);
 		ItemData.SuccessRate = (ItemData.Wins/ (TableData.Length + 1.0)) * 100 $ "%";
-		`log("denominator is the number plus 1"@TableData.Length);
-		`log("success rate is"@ItemData.SuccessRate);
-		`log("math has finished");
 	} else {
-	// loss
-		`log("its a loss");
 		ItemData.Wins = TableData[TableData.Length - 1].Wins;
 		ItemData.SuccessRate = (TableData[TableData.Length - 1].Wins / (TableData.Length + 1.0)) * 100 $ "%";
-		`log("math has finished");
 	}
 	if (Faction.FactionName == "") {
 		ItemData.QuestGiver = "The Council";
 	} else {
 		ItemData.QuestGiver = Faction.FactionName;
 	}
-	`log("faction name assigned");
 	TableData.AddItem(ItemData);
-	`log("everything was saved");
 }
 
 function int sortByWins(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {

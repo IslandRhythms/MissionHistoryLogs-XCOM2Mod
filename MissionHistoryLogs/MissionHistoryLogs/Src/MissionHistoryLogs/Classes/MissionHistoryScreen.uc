@@ -81,17 +81,17 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	} else {
 		StrDetails = StrDetails $ "\nAgainst:" @ Data.Enemies;
 	}
-	StrDetails = StrDetails $ "\nEnemies on site:"@Data.NumEnemiesDeployed;
-	StrDetails = StrDetails $ "\nXCOM engaged and directly killed:"@Data.NumEnemiesKilled@" Enemies";
 	StrDetails = StrDetails $ "\nWith a force level of"@Data.ForceLevel;
 	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
-	if (Data.VIP == "" && Data.SoldierVIPOne == "" && Data.SoldierVIPTwo == "") {
+	if (Data.bIsVIPMission) {
+		if (Data.VIP == "" && Data.SoldierVIPOne == "" && Data.SoldierVIPTwo == "") {
 		StrDetails = StrDetails $ "\nAll Agents died in the recovery attempt";
 	} else {
 		if (Data.VIP != "") StrDetails = StrDetails $ "\nVIP Rescued:"@Data.VIP;
 		if (Data.SoldierVIPOne != "" && Data.SoldierVIPTwo != "") { StrDetails = StrDetails $ "\nAgents Rescued:" @Data.SoldierVIPOne@Data.SoldierVIPTwo;}
 		else if (Data.SoldierVIPOne != "") {StrDetails = StrDetails $ "\nAgent Rescued:"@Data.SoldierVIPOne;}
 		else if (Data.SoldierVIPTwo != "") {StrDetails = StrDetails $ "\nAgent Rescued:"@Data.SoldierVIPTwo;}
+	}
 	}
 	DialogData.strText = StrDetails;
 	DialogData.strImagePath = class'UIUtilities_Image'.static.ValidateImagePath(Data.ObjectiveImagePath);
