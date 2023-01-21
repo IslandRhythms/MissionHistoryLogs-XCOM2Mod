@@ -220,8 +220,6 @@ function UpdateTableData() {
 	ItemData.EntryIndex = TableData.Length + 1;
 	ItemData.Date = class 'X2StrategyGameRulesetDataStructures'.static.GetDateString(BattleData.LocalTime, true);
 	ItemData.MissionName = BattleData.m_strOpName;
-	ItemData.NumEnemiesDeployed = NumEnemiesDeployed; // + TemplatesToSpawn.Length; // what is TemplatesToSpawn suppose to be? Reinforcements? Civilians? both?
-	ItemData.NumEnemiesKilled = NumEnemiesKilled;
 	// Gatecrasher's objective is the same as the op name and thats lame.
 	// Gatecrasher seems to be a special case
 	if (BattleData.m_strOpName == "Operation Gatecrasher") {
