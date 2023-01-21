@@ -193,8 +193,8 @@ function UpdateTableData() {
 					ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 					ItemData.Enemies = TheChosen[Index].ChosenType;
 					ItemData.NumChosenEncounters = TheChosen[Index].NumEncounters;
-					`log("what is the number of encounters"@ChosenState.NumEncounters);
-					`log("what is the number of defeats"@ChosenState.NumDefeats);
+					`log("what is the number of times xcom has encountered this chosen?"@ItemData.NumChosenEncounters);
+					`log("what is the number of times xcom has defeated this chosen?"@TheChosen[Index].NumDefeats);
 					ItemData.WinPercentageAgainstChosen = float(TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters);
 					break;
 				}
