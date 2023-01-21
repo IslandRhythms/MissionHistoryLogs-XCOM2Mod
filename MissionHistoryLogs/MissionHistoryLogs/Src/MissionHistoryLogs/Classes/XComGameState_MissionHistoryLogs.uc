@@ -180,7 +180,7 @@ function UpdateTableData() {
 			ItemData.Enemies = MiniBoss.ChosenType;
 			ItemData.NumChosenEncounters = float(ChosenState.NumEncounters);
 			`log("what is the number of encounters?"@ChosenState.NumEncounters);
-			ItemData.WinPercentageAgainstChosen = float(MiniBoss.NumDefeats / MiniBoss.NumEncounters);
+			ItemData.WinPercentageAgainstChosen = MiniBoss.NumDefeats / MiniBoss.NumEncounters;
 			`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 		} else {
 			`log("we've encountered them before");
@@ -197,7 +197,7 @@ function UpdateTableData() {
 					ItemData.NumChosenEncounters = TheChosen[Index].NumEncounters;
 					`log("what is the number of times xcom has encountered this chosen?"@ItemData.NumChosenEncounters);
 					`log("what is the number of times xcom has defeated this chosen?"@TheChosen[Index].NumDefeats);
-					ItemData.WinPercentageAgainstChosen = float(TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters);
+					ItemData.WinPercentageAgainstChosen = TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters;
 					break;
 				}
 			}
