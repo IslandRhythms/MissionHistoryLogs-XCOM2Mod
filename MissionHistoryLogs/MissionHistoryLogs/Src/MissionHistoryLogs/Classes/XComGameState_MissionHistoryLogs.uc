@@ -242,7 +242,8 @@ function UpdateTableData() {
 	if (TableData.Length > 1) {
 		TableData.Sort(sortByEntryIndex);
 	}
-	if (BattleData.bLocalPlayerWon) {
+	// keep this check the same as the UI to avoid headaches
+	if (BattleData.bLocalPlayerWon && !BattleData.bMissionAborted) {
 		ItemData.Wins = TableData[TableData.Length - 1].Wins + 1.0;
 		ItemData.SuccessRate = (ItemData.Wins/ (TableData.Length + 1.0)) * 100 $ "%";
 	} else {
