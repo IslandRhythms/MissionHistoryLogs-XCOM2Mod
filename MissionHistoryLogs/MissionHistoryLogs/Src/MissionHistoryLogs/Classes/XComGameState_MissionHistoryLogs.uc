@@ -47,19 +47,10 @@ struct ChosenInformation {
 	var int CampaignIndex;
 };
 
-struct SquadInformation {
-	var string SquadName;
-	var string SoldierNames; // This may not be the same as the soldiers that were on the mission, and thats fine.
-	var float numMissions; // declare as float for easier math later
-	var float numWins;
-};
-
 
 var array<MissionHistoryLogsDetails> TableData;
 // fireaxis why
 var array<ChosenInformation> TheChosen;
-
-var array<SquadInformation> SquadData;
 
 
 function UpdateTableData() {
@@ -108,17 +99,13 @@ function UpdateTableData() {
 	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
-	// This will get the correct squad on a mission
 	if(IsModActive('SquadManager')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
-		// Squad = SquadMgr.GetSquadAfterMission(MissionDetails.ObjectID);
 		Squad = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(SquadMgr.LastMissionSquad.ObjectID));
-		`log("what is squad name"@Squad.sSquadName);
 		if (Squad.sSquadName != "") {
 			ItemData.SquadName = Squad.sSquadName;
 		} else {
-			`log("The squad name is empty for some reason");
-			ItemData.SquadName = "XCOM";
+			ItemData.SquadName = "XCOM"; // Squad name for Operation Gatecrasher
 		}
 	} else {
 		// can also take approach of listing Unit nicknames that were on the mission.
@@ -157,7 +144,6 @@ function UpdateTableData() {
 	}
 	// we need to keep track of when the chosen is encountered because any variable that could help us do this is only valid in the tactical layer.
 	// for some reason when it gets to strategy, any variable that could help us determine if the chosen was on the most recent mission gets wiped.
-	`log("This is how we'll know if the chosen was on the mission hopefully"@BattleData.ChosenRef.ObjectID);
 	if (BattleData.ChosenRef.ObjectID == 0) {
 		ItemData.Enemies = "Advent";
 	} else {
@@ -165,7 +151,6 @@ function UpdateTableData() {
 		ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 		// if we are checking that they weren't on the last mission, then this number should increase correctly.
 		if (ChosenState.NumEncounters == 1) {
-			`log("our first encounter with this chosen");
 			MiniBoss.ChosenType = string(ChosenState.GetMyTemplateName());
 			MiniBoss.ChosenType = Split(MiniBoss.ChosenType, "_", true);
 			MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
@@ -174,7 +159,6 @@ function UpdateTableData() {
 			if (BattleData.bChosenLost) {
 				MiniBoss.NumDefeats += 1.0;
 			}
-			`log("what is the number of of times xcom has defeated this chosen?"@MiniBoss.NumDefeats);
 			TheChosen.AddItem(MiniBoss);
 			ItemData.ChosenName = MiniBoss.ChosenName;
 			ItemData.Enemies = MiniBoss.ChosenType;
@@ -183,7 +167,6 @@ function UpdateTableData() {
 			ItemData.WinPercentageAgainstChosen = MiniBoss.NumDefeats / MiniBoss.NumEncounters;
 			`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 		} else {
-			`log("we've encountered them before");
 			for (Index = 0; Index < TheChosen.Length; Index++) {
 				ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 				if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
@@ -195,8 +178,6 @@ function UpdateTableData() {
 					ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
 					ItemData.Enemies = TheChosen[Index].ChosenType;
 					ItemData.NumChosenEncounters = TheChosen[Index].NumEncounters;
-					`log("what is the number of times xcom has encountered this chosen?"@ItemData.NumChosenEncounters);
-					`log("what is the number of times xcom has defeated this chosen?"@TheChosen[Index].NumDefeats);
 					ItemData.WinPercentageAgainstChosen = TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters;
 					break;
 				}
