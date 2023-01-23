@@ -140,14 +140,13 @@ private function BuildListItems(){
 
 }
 
-// this is causing a crash
 function LoadFinished()
 {
 	Movie.Pres.UICloseProgressDialog();
 
 	BuildListItems();
 
-	RefreshData(); // most likely this line. No sort functions are defined and this function calls sort.
+	RefreshData();
 
 	Navigator.SetSelected(List);
 	List.Navigator.SelectFirstAvailable();
