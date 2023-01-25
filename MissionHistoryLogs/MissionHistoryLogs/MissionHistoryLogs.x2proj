@@ -3,7 +3,9 @@
   <PropertyGroup>
     <Guid>71464f33-1328-43a5-b3a7-e1278bd89611</Guid>
     <Name>Mission History Logs</Name>
-    <Description>Description of My XCOM 2 Mod.</Description>
+    <Description>Description of My XCOM 2 Mod.
+
+tags= UI, Gameplay, Facility</Description>
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>MissionHistoryLogs</AssemblyName>
     <RootNamespace>MissionHistoryLogs</RootNamespace>
@@ -24,8 +26,10 @@
     <Content Include="Localization\MissionHistoryLogs.int">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="ModPreview.jpg">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="ReadMe.txt" />
-    <Content Include="ModPreview.jpg" />
     <Content Include="Config\XComEditor.ini" />
     <Content Include="Config\XComEngine.ini" />
     <Content Include="Config\XComGame.ini" />
