@@ -191,7 +191,7 @@ simulated function int SortByTeam(MissionHistoryLogsDetails A, MissionHistoryLog
 	return SortAlphabetically(A.SquadName, B.SquadName);
 }
 simulated function int SortByDate(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {
-	return SortAlphabetically(A.Date, B.Date);
+	return SortRawDate(A.RawDate, B.RawDate);
 }
 simulated function int SortByRating(MissionHistoryLogsDetails A, MissionHistoryLogsDetails B) {
 	return SortAlphabetically(A.MissionRating, B.MissionRating);
@@ -220,6 +220,20 @@ simulated function int SortAlphabetically(string A, string B)
 		return m_bFlipSort ? 1 : -1;
 	}
 	else // Names match
+	{
+		return 0;
+	}
+}
+
+simulated function int SortRawDate(TDateTime A, TDateTime B) {
+
+	if (class 'X2StrategyGameRulesetDataStructures'.static.LessThan(A, B)) {
+		return m_bFlipSort ? -1 : 1;
+	}
+	else if (class 'X2StrategyGameRulesetDataStructures'.static.LessThan(B, A)) {
+		return m_bFlipSort ? 1 : -1;
+	}
+	else 
 	{
 		return 0;
 	}

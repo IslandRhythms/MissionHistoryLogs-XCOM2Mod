@@ -21,6 +21,7 @@ struct MissionHistoryLogsDetails {
 	var float Wins;
 	var string SuccessRate;
 	var string Date;
+	var TDateTime RawDate;
 	var string MissionName;
 	var string MissionObjective;
 	var string MapName;
@@ -202,6 +203,7 @@ function UpdateTableData() {
 	ItemData.CampaignIndex = CampaignIndex;
 	ItemData.EntryIndex = TableData.Length + 1;
 	ItemData.Date = class 'X2StrategyGameRulesetDataStructures'.static.GetDateString(BattleData.LocalTime, true);
+	ItemData.RawDate = BattleData.LocalTime;
 	ItemData.MissionName = BattleData.m_strOpName;
 	// Gatecrasher's objective is the same as the op name and thats lame.
 	// Gatecrasher seems to be a special case
