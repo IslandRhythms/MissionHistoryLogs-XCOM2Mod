@@ -10,7 +10,7 @@ you can go into the MissionHistoryLogs.int file and change what you want the def
 
 You can also thank Rusty for the CTD fix on Ongoing campaigns.
 
-Also it should support LWOTC. Let me know if it doesn't.
+Support for LWOTC causes a crash, so unable to support.
 
 Leave a comment if you want me to add something and I'll see what I can do.
 
