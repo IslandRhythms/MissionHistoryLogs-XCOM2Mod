@@ -16,7 +16,9 @@ class X2DownloadableContentInfo_MissionHistoryLogs extends X2DownloadableContent
 /// create without the content installed. Subsequent saves will record that the content was installed.
 /// </summary>
 static event OnLoadedSavedGame()
-{}
+{
+	CheckUpdateOrCreateNewGameState();
+}
 
 /// <summary>
 /// Called when the player starts a new campaign while this DLC / Mod is installed
@@ -24,17 +26,22 @@ static event OnLoadedSavedGame()
 static event InstallNewCampaign(XComGameState StartState)
 {}
 
-static event OnPostMission()
+static event OnPostMission() {
+	CheckUpdateOrCreateNewGameState();
+}
+
+
+static final function CheckUpdateOrCreateNewGameState()
 {
-    local XComGameState_MissionHistoryLogs Log;
+	local XComGameState_MissionHistoryLogs Log;
     local XComGameState NewGameState;
     local XComGameStateHistory History;
 
     History = `XCOMHISTORY;
     Log = XComGameState_MissionHistoryLogs(History.GetSingleGameStateObjectForClass(class 'XComGameState_MissionHistoryLogs', true));
-    
-    NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Optional Debug Comment");
-    
+
+    NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("Check, create or Update MissionLogs");
+
     if (Log == none)
     {
         Log = XComGameState_MissionHistoryLogs(NewGameState.CreateNewStateObject(class'XComGameState_MissionHistoryLogs'));
@@ -43,7 +50,7 @@ static event OnPostMission()
     {
         Log = XComGameState_MissionHistoryLogs(NewGameState.ModifyStateObject(Log.Class, Log.ObjectID));
     }
-    
+
     Log.UpdateTableData();
 
     `GAMERULES.SubmitGameState(NewGameState);

@@ -53,6 +53,7 @@ var array<MissionHistoryLogsDetails> TableData;
 // fireaxis why
 var array<ChosenInformation> TheChosen;
 
+var localized string squadLabel;
 
 function UpdateTableData() {
 	local int injured, captured, killed, total, Index, CampaignIndex, MapIndex;
@@ -100,18 +101,13 @@ function UpdateTableData() {
 	CampaignSettingsStateObject = XComGameState_CampaignSettings(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_CampaignSettings', true));
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
-	if(IsModActive('SquadManager')) {
+	ItemData.SquadName = default.squadLabel;
+	if(IsModActive('SquadManager') || IsModActive('LongWarOfTheChosen')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
 		Squad = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(SquadMgr.LastMissionSquad.ObjectID));
 		if (Squad.sSquadName != "") {
 			ItemData.SquadName = Squad.sSquadName;
-		} else {
-			ItemData.SquadName = "XCOM"; // Squad name for Operation Gatecrasher
 		}
-	} else {
-		// can also take approach of listing Unit nicknames that were on the mission.
-		// we'll do this for now.
-		ItemData.SquadName = "XCOM";
 	}
 	AlienHQ = XComGameState_HeadquartersAlien(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_HeadquartersAlien', true));
 	Faction = XComGameState_ResistanceFaction(`XCOMHISTORY.GetGameStateForObjectID(MissionDetails.ResistanceFaction.ObjectID));
@@ -150,8 +146,10 @@ function UpdateTableData() {
 	} else {
 		ChosenState = XComGameState_AdventChosen(`XCOMHISTORY.GetGameStateForObjectID(BattleData.ChosenRef.ObjectID));
 		ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
+		Index = TheChosen.Find('ChosenName', ChosenName);
 		// if we are checking that they weren't on the last mission, then this number should increase correctly.
-		if (ChosenState.NumEncounters == 1) {
+		// what if this is installed mid campaign?
+		if (ChosenState.NumEncounters == 1 || Index == -1) {
 			MiniBoss.ChosenType = string(ChosenState.GetMyTemplateName());
 			MiniBoss.ChosenType = Split(MiniBoss.ChosenType, "_", true);
 			MiniBoss.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
@@ -168,20 +166,16 @@ function UpdateTableData() {
 			ItemData.WinPercentageAgainstChosen = MiniBoss.NumDefeats / MiniBoss.NumEncounters;
 			`log("Win Percentage is"@ItemData.WinPercentageAgainstChosen);
 		} else {
-			for (Index = 0; Index < TheChosen.Length; Index++) {
-				ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-				if (TheChosen[Index].ChosenName == ChosenName && TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
-					TheChosen[Index].NumEncounters = float(ChosenState.NumEncounters);
-					if(BattleData.bChosenLost) {
-						`log("the chosen was defeated this mission");
-						TheChosen[Index].NumDefeats += 1.0;
-					}
-					ItemData.ChosenName = ChosenState.FirstName $ " " $ ChosenState.NickName $ " " $ ChosenState.LastName;
-					ItemData.Enemies = TheChosen[Index].ChosenType;
-					ItemData.NumChosenEncounters = TheChosen[Index].NumEncounters;
-					ItemData.WinPercentageAgainstChosen = TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters;
-					break;
+			if (TheChosen[Index].NumEncounters != ChosenState.NumEncounters) {
+				TheChosen[Index].NumEncounters = float(ChosenState.NumEncounters);
+				if(BattleData.bChosenLost) {
+					`log("the chosen was defeated this mission");
+					TheChosen[Index].NumDefeats += 1.0;
 				}
+				ItemData.ChosenName = ChosenName;
+				ItemData.Enemies = TheChosen[Index].ChosenType;
+				ItemData.NumChosenEncounters = TheChosen[Index].NumEncounters;
+				ItemData.WinPercentageAgainstChosen = TheChosen[Index].NumDefeats / TheChosen[Index].NumEncounters;
 			}
 		}
 	}
