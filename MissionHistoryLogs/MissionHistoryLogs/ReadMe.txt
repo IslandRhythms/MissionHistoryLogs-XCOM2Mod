@@ -8,9 +8,6 @@ The squad manager is not a hard dependency. If it doesn't detect the squad manag
 Thanks to Rusty's Suggestion,
 you can go into the MissionHistoryLogs.int file and change what you want the default to be.
 
-The character limit is 11 as any more and it will bleed over into the next column. The mod checks for this,
-so even if you go over it will prevent the bleed.
-
 You can also thank Rusty for the CTD fix on Ongoing campaigns.
 
 Also it should support LWOTC. Let me know if it doesn't.
