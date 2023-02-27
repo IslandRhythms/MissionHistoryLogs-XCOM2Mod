@@ -102,7 +102,7 @@ function UpdateTableData() {
 	CampaignIndex = CampaignSettingsStateObject.GameIndex;
 	MissionDetails = XComGameState_MissionSite(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_MissionSite', true));
 	ItemData.SquadName = default.squadLabel;
-	if(IsModActive('SquadManager')) {
+	if(IsModActive('SquadManager') || IsModActive('LongWarOfTheChosen')) {
 		SquadMgr = XComGameState_LWSquadManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'XComGameState_LWSquadManager', true));
 		Squad = XComGameState_LWPersistentSquad(`XCOMHISTORY.GetGameStateForObjectID(SquadMgr.LastMissionSquad.ObjectID));
 		if (Squad.sSquadName != "") {

@@ -83,6 +83,7 @@ simulated function OnChallengeClicked(UIList ContainerList, int ListItemIndex) {
 	}
 	StrDetails = StrDetails $ "\nWith a force level of"@Data.ForceLevel;
 	StrDetails = StrDetails $ "\nSoldier MVP:" @ Data.SoldierMVP;
+	// Possible LWOTC Bug, Not a VIP mission but this still triggered.
 	if (Data.bIsVIPMission) {
 		if (Data.VIP == "" && Data.SoldierVIPOne == "" && Data.SoldierVIPTwo == "") {
 		StrDetails = StrDetails $ "\nAll Agents died in the recovery attempt";
